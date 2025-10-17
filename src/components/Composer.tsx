@@ -59,12 +59,15 @@ const Composer: React.FC<ComposerProps> = ({
             {/* Attached Files Preview */}
             {attachments.length > 0 && (
                 <Box className="mb-3">
-                    <Attachments
-                        attachments={attachments}
-                        onAttachmentsChange={onAttachmentsChange}
-                        disabled={disabled}
-                        showOnlyChips={true}
-                    />
+                    {/* Attachment chips */}
+                    <Box className="mb-2">
+                        <Attachments
+                            attachments={attachments}
+                            onAttachmentsChange={onAttachmentsChange}
+                            disabled={disabled}
+                            showOnlyChips={true}
+                        />
+                    </Box>
                 </Box>
             )}
 
