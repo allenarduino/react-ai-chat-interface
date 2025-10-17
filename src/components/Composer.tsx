@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Box, TextField, IconButton, Typography, Select, MenuItem, Slider } from '@mui/material';
+import { Box, TextField, IconButton, Typography, Slider } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
 import { Send, Close, Tune } from '@mui/icons-material';
 import { motion } from 'framer-motion';
@@ -64,7 +64,7 @@ const Composer: React.FC<ComposerProps> = ({
     const handleToneChange = (event: SelectChangeEvent) => {
         onOptionsChange({
             ...options,
-            tone: event.target.value as 'friendly' | 'formal' | 'creative'
+            tone: event.target.value as 'professional' | 'friendly' | 'formal' | 'creative'
         });
     };
 
@@ -127,7 +127,7 @@ const Composer: React.FC<ComposerProps> = ({
                         boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
                         padding: '16px',
                         width: '288px',
-                        zIndex: 9999,
+                        zIndex: 10001,
                     }}
                 >
                     {/* Header */}
@@ -152,31 +152,18 @@ const Composer: React.FC<ComposerProps> = ({
                             <Typography variant="caption" className="text-xs font-medium text-gray-700 block">
                                 Tone
                             </Typography>
-                            <Select
+                            <select
                                 value={options.tone}
-                                onChange={handleToneChange}
-                                size="small"
-                                className="w-full"
-                                sx={{
-                                    backgroundColor: 'white',
-                                    borderRadius: '8px',
-                                    fontSize: '14px',
-                                    '& .MuiOutlinedInput-notchedOutline': {
-                                        borderColor: '#E5E7EB',
-                                    },
-                                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                                        borderColor: '#D1D5DB',
-                                    },
-                                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                        borderColor: '#9CA3AF',
-                                        boxShadow: '0 0 0 2px rgba(156, 163, 175, 0.2)',
-                                    },
+                                onChange={(e) => {
+                                    handleToneChange({ target: { value: e.target.value } } as SelectChangeEvent);
                                 }}
+                                className="w-full px-3 py-2 mt-20  border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             >
-                                <MenuItem value="friendly">Friendly</MenuItem>
-                                <MenuItem value="formal">Formal</MenuItem>
-                                <MenuItem value="creative">Creative</MenuItem>
-                            </Select>
+                                <option value="professional">Professional</option>
+                                <option value="friendly">Friendly</option>
+                                <option value="formal">Formal</option>
+                                <option value="creative">Creative</option>
+                            </select>
                         </Box>
 
                         {/* Response Length */}
@@ -224,31 +211,17 @@ const Composer: React.FC<ComposerProps> = ({
                             <Typography variant="caption" className="text-xs font-medium text-gray-700 block">
                                 Model Choice
                             </Typography>
-                            <Select
+                            <select
                                 value={options.model}
-                                onChange={handleModelChange}
-                                size="small"
-                                className="w-full"
-                                sx={{
-                                    backgroundColor: 'white',
-                                    borderRadius: '8px',
-                                    fontSize: '14px',
-                                    '& .MuiOutlinedInput-notchedOutline': {
-                                        borderColor: '#E5E7EB',
-                                    },
-                                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                                        borderColor: '#D1D5DB',
-                                    },
-                                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                        borderColor: '#9CA3AF',
-                                        boxShadow: '0 0 0 2px rgba(156, 163, 175, 0.2)',
-                                    },
+                                onChange={(e) => {
+                                    handleModelChange({ target: { value: e.target.value } } as SelectChangeEvent);
                                 }}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             >
-                                <MenuItem value="gpt-3.5-turbo">GPT-3</MenuItem>
-                                <MenuItem value="gpt-4">GPT-4</MenuItem>
-                                <MenuItem value="claude-3.5-sonnet">Custom</MenuItem>
-                            </Select>
+                                <option value="gpt-3.5-turbo">GPT-3</option>
+                                <option value="gpt-4">GPT-4</option>
+                                <option value="claude-3.5-sonnet">Custom</option>
+                            </select>
                         </Box>
                     </Box>
                 </Box>
