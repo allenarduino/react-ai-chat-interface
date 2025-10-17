@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Box, TextField, IconButton, Typography, Slider } from '@mui/material';
-import { Send, Close, Tune } from '@mui/icons-material';
+import { Box, TextField, IconButton } from '@mui/material';
+import { Send, Tune } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import type { ChatOptions, Attachment } from '../types/chat';
 import Attachments from './Attachments';
-import { CustomDropdown, type Option } from './CustomDropdown';
+import OptionsPanel from './OptionsPanel';
 
 interface ComposerProps {
     onSend: (text: string, options: ChatOptions, attachments: Attachment[]) => void;
@@ -60,42 +60,6 @@ const Composer: React.FC<ComposerProps> = ({
 
     const canSend = message.trim().length > 0 && !disabled;
 
-    // Options for dropdowns
-    const toneOptions: Option[] = [
-        { id: 'professional', value: 'professional', name: 'Professional' },
-        { id: 'friendly', value: 'friendly', name: 'Friendly' },
-        { id: 'formal', value: 'formal', name: 'Formal' },
-        { id: 'creative', value: 'creative', name: 'Creative' },
-    ];
-
-    const modelOptions: Option[] = [
-        { id: 'gpt-3.5-turbo', value: 'gpt-3.5-turbo', name: 'GPT-3' },
-        { id: 'gpt-4', value: 'gpt-4', name: 'GPT-4' },
-        { id: 'claude-3.5-sonnet', value: 'claude-3.5-sonnet', name: 'Custom' },
-    ];
-
-    // Handle options changes
-    const handleToneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        onOptionsChange({
-            ...options,
-            tone: event.target.value as 'professional' | 'friendly' | 'formal' | 'creative'
-        });
-    };
-
-    const handleLengthChange = (_: Event, newValue: number | number[]) => {
-        const lengthValue = newValue === 1 ? 'short' : newValue === 2 ? 'medium' : 'long';
-        onOptionsChange({
-            ...options,
-            responseLength: lengthValue as 'short' | 'medium' | 'long'
-        });
-    };
-
-    const handleModelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        onOptionsChange({
-            ...options,
-            model: event.target.value as 'gpt-3.5-turbo' | 'gpt-4' | 'claude-3.5-sonnet'
-        });
-    };
 
     // Handle clicking outside the options panel
     useEffect(() => {
@@ -135,105 +99,14 @@ const Composer: React.FC<ComposerProps> = ({
             )}
 
             {/* Options Panel */}
-            {showOptionsPanel && (
-                <Box
-                    ref={optionsRef}
-                    sx={{
-                        position: 'absolute',
-                        right: '24px',
-                        bottom: '100%',
-                        marginBottom: '8px',
-                        backgroundColor: '#F9FAFB',
-                        border: '1px solid #E5E7EB',
-                        borderRadius: '12px',
-                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-                        padding: '16px',
-                        width: '288px',
-                        zIndex: 10001,
-                        overflow: 'visible',
-                    }}
-                >
-                    {/* Header */}
-                    <Box className="flex items-center justify-between mb-3">
-                        <Typography variant="subtitle2" className="text-sm font-semibold text-gray-800">
-                            Response Settings
-                        </Typography>
-                        <IconButton
-                            size="small"
-                            onClick={() => setShowOptionsPanel(false)}
-                            className="text-gray-500 hover:text-gray-700"
-                            sx={{ padding: '4px' }}
-                        >
-                            <Close fontSize="small" />
-                        </IconButton>
-                    </Box>
-
-                    {/* Controls */}
-                    <Box className="space-y-4">
-                        {/* Tone */}
-                        <Box className="space-y-2">
-                            <CustomDropdown
-                                label="Tone"
-                                options={toneOptions}
-                                value={options.tone}
-                                onChange={handleToneChange}
-                                placeholder="Select tone"
-                            />
-                        </Box>
-
-                        {/* Response Length */}
-                        <Box className="space-y-2">
-                            <Typography variant="caption" className="text-xs font-medium text-gray-700 block">
-                                Response Length
-                            </Typography>
-                            <Box className="px-1">
-                                <Slider
-                                    value={options.responseLength === 'short' ? 1 : options.responseLength === 'medium' ? 2 : 3}
-                                    onChange={handleLengthChange}
-                                    min={1}
-                                    max={3}
-                                    step={1}
-                                    marks={[
-                                        { value: 1, label: 'Short' },
-                                        { value: 2, label: 'Medium' },
-                                        { value: 3, label: 'Long' },
-                                    ]}
-                                    sx={{
-                                        color: '#6B7280',
-                                        '& .MuiSlider-thumb': {
-                                            backgroundColor: '#374151',
-                                        },
-                                        '& .MuiSlider-track': {
-                                            backgroundColor: '#6B7280',
-                                        },
-                                        '& .MuiSlider-mark': {
-                                            backgroundColor: '#9CA3AF',
-                                        },
-                                        '& .MuiSlider-markLabel': {
-                                            fontSize: '0.75rem',
-                                            color: '#6B7280',
-                                        },
-                                    }}
-                                />
-                            </Box>
-                            <Typography variant="caption" className="text-xs text-gray-600 text-center block">
-                                {options.responseLength === 'short' ? 'Short' : options.responseLength === 'medium' ? 'Medium' : 'Long'}
-                            </Typography>
-                        </Box>
-
-                        {/* Model Choice */}
-                        <Box className="space-y-2">
-                            <CustomDropdown
-                                label="Model Choice"
-                                options={modelOptions}
-                                value={options.model}
-                                onChange={handleModelChange}
-                                placeholder="Select model..."
-                            />
-                        </Box>
-                    </Box>
-                </Box>
-            )}
+            <div ref={optionsRef}>
+                <OptionsPanel
+                    options={options}
+                    onOptionsChange={onOptionsChange}
+                    onClose={() => setShowOptionsPanel(false)}
+                    isOpen={showOptionsPanel}
+                />
+            </div>
 
             {/* Message Input */}
             <Box className="flex items-end space-x-2">
