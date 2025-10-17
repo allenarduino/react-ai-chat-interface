@@ -5,7 +5,6 @@ import { DEFAULT_CHAT_OPTIONS } from '../types/chat';
 import { generateMessageId } from '../utils/format';
 import MessageList from '../components/MessageList';
 import Composer from '../components/Composer';
-import OptionsPanel from '../components/OptionsPanel';
 
 const Home: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([
@@ -80,16 +79,11 @@ const Home: React.FC = () => {
             {/* Chat Messages Area */}
             <MessageList messages={messages} />
 
-            {/* Options Panel */}
-            <OptionsPanel
-                options={options}
-                onChange={setOptions}
-            />
-
             {/* Composer Section */}
             <Composer
                 onSend={handleSendMessage}
                 options={options}
+                onOptionsChange={setOptions}
                 attachments={attachedFiles}
                 onAttachmentsChange={setAttachedFiles}
             />

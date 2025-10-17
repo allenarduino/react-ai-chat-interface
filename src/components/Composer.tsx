@@ -1,13 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Box, TextField, IconButton } from '@mui/material';
-import { Send } from '@mui/icons-material';
+import { Send, Tune } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import type { ChatOptions, Attachment } from '../types/chat';
 import Attachments from './Attachments';
+import OptionsPanel from './OptionsPanel';
 
 interface ComposerProps {
     onSend: (text: string, options: ChatOptions, attachments: Attachment[]) => void;
     options: ChatOptions;
+    onOptionsChange: (options: ChatOptions) => void;
     attachments: Attachment[];
     onAttachmentsChange: (attachments: Attachment[] | ((prev: Attachment[]) => Attachment[])) => void;
     disabled?: boolean;
@@ -17,6 +19,7 @@ interface ComposerProps {
 const Composer: React.FC<ComposerProps> = ({
     onSend,
     options,
+    onOptionsChange,
     attachments,
     onAttachmentsChange,
     disabled = false,
@@ -24,7 +27,9 @@ const Composer: React.FC<ComposerProps> = ({
 }) => {
     const [message, setMessage] = useState('');
     const [isFocused, setIsFocused] = useState(false);
+    const [showOptionsPanel, setShowOptionsPanel] = useState(false);
     const textareaRef = useRef<HTMLDivElement>(null);
+    const optionsRef = useRef<HTMLDivElement>(null);
 
     // Auto-resize textarea based on content
     useEffect(() => {
@@ -33,6 +38,7 @@ const Composer: React.FC<ComposerProps> = ({
             textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
         }
     }, [message]);
+
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -54,8 +60,29 @@ const Composer: React.FC<ComposerProps> = ({
 
     const canSend = message.trim().length > 0 && !disabled;
 
+
+    // Handle clicking outside the options panel
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (showOptionsPanel && optionsRef.current && !optionsRef.current.contains(event.target as Node)) {
+                setShowOptionsPanel(false);
+            }
+        };
+
+        if (showOptionsPanel) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showOptionsPanel]);
+
     return (
-        <Box className="border-t border-gray-200 p-4 bg-white">
+        <Box
+            className="border-t border-gray-200 p-4 bg-white relative"
+            sx={{ position: 'relative' }}
+        >
             {/* Attached Files Preview */}
             {attachments.length > 0 && (
                 <Box className="mb-3">
@@ -70,6 +97,16 @@ const Composer: React.FC<ComposerProps> = ({
                     </Box>
                 </Box>
             )}
+
+            {/* Options Panel */}
+            <div ref={optionsRef}>
+                <OptionsPanel
+                    options={options}
+                    onOptionsChange={onOptionsChange}
+                    onClose={() => setShowOptionsPanel(false)}
+                    isOpen={showOptionsPanel}
+                />
+            </div>
 
             {/* Message Input */}
             <Box className="flex items-end space-x-2">
@@ -130,6 +167,22 @@ const Composer: React.FC<ComposerProps> = ({
                         'aria-describedby': 'message-help-text',
                     }}
                 />
+
+                {/* Settings button */}
+                <IconButton
+                    onClick={() => setShowOptionsPanel(!showOptionsPanel)}
+                    disabled={disabled}
+                    className="text-gray-500 hover:text-gray-700"
+                    sx={{
+                        borderRadius: '8px',
+                        width: '40px',
+                        height: '40px',
+                        transition: 'all 0.2s ease-in-out',
+                    }}
+                    aria-label="Response settings"
+                >
+                    <Tune />
+                </IconButton>
 
                 {/* Send button with animation */}
                 <motion.div

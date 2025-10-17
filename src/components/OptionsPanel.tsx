@@ -1,151 +1,152 @@
 import React from 'react';
-import { Box, FormControl, InputLabel, Select, MenuItem, Slider, Typography, Tooltip } from '@mui/material';
-import type { SelectChangeEvent } from '@mui/material/Select';
-import type { ChatOptions, ToneType, ResponseLengthType, ModelType } from '../types/chat';
+import { Box, IconButton, Typography, Slider } from '@mui/material';
+import { Close } from '@mui/icons-material';
+import { CustomDropdown, type Option } from './CustomDropdown';
+import type { ChatOptions } from '../types/chat';
 
 interface OptionsPanelProps {
     options: ChatOptions;
-    onChange: (options: ChatOptions) => void;
-    disabled?: boolean;
+    onOptionsChange: (options: ChatOptions) => void;
+    onClose: () => void;
+    isOpen: boolean;
 }
 
 const OptionsPanel: React.FC<OptionsPanelProps> = ({
     options,
-    onChange,
-    disabled = false
+    onOptionsChange,
+    onClose,
+    isOpen
 }) => {
-    const handleToneChange = (e: SelectChangeEvent<ToneType>) => {
-        onChange({ ...options, tone: e.target.value as ToneType });
+    if (!isOpen) return null;
+
+    const toneOptions: Option[] = [
+        { id: '1', value: 'professional', name: 'Professional' },
+        { id: '2', value: 'friendly', name: 'Friendly' },
+        { id: '3', value: 'formal', name: 'Formal' },
+        { id: '4', value: 'creative', name: 'Creative' },
+    ];
+
+    const modelOptions: Option[] = [
+        { id: '1', value: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo' },
+        { id: '2', value: 'gpt-4', name: 'GPT-4' },
+        { id: '3', value: 'claude-3.5-sonnet', name: 'Claude 3.5 Sonnet' },
+    ];
+
+    const handleToneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        onOptionsChange({
+            ...options,
+            tone: event.target.value as 'professional' | 'friendly' | 'formal' | 'creative'
+        });
     };
 
-
-    const handleModelChange = (e: SelectChangeEvent<ModelType>) => {
-        onChange({ ...options, model: e.target.value as ModelType });
+    const handleLengthChange = (_: Event, newValue: number | number[]) => {
+        const lengthValue = newValue === 1 ? 'short' : newValue === 2 ? 'medium' : 'long';
+        onOptionsChange({
+            ...options,
+            responseLength: lengthValue as 'short' | 'medium' | 'long'
+        });
     };
 
-    const handleLengthSliderChange = (_e: Event, value: number | number[]) => {
-        const lengthMap = [0, 1, 2, 3]; // short, medium, long, detailed
-        const lengthValues: ResponseLengthType[] = ['short', 'medium', 'long', 'detailed'];
-        const selectedIndex = lengthMap.indexOf(value as number);
-        if (selectedIndex !== -1) {
-            onChange({ ...options, responseLength: lengthValues[selectedIndex] });
-        }
-    };
-
-    const getSliderValue = () => {
-        const lengthMap: Record<ResponseLengthType, number> = {
-            'short': 0,
-            'medium': 1,
-            'long': 2,
-            'detailed': 3
-        };
-        return lengthMap[options.responseLength];
+    const handleModelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        onOptionsChange({
+            ...options,
+            model: event.target.value as 'gpt-3.5-turbo' | 'gpt-4' | 'claude-3.5-sonnet'
+        });
     };
 
     return (
-        <Box className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-3">
-            <Box className="flex flex-wrap gap-6 items-center">
-                {/* Tone Selection */}
-                <Tooltip
-                    title="Choose the conversational style for AI responses"
-                    placement="top"
-                    arrow
+        <Box
+            sx={{
+                position: 'absolute',
+                right: '24px',
+                bottom: '100%',
+                marginBottom: '8px',
+                backgroundColor: '#F9FAFB',
+                border: '1px solid #E5E7EB',
+                borderRadius: '12px',
+                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                padding: '16px',
+                width: '288px',
+                zIndex: 10001,
+                overflow: 'visible',
+            }}
+        >
+            {/* Header */}
+            <Box className="flex items-center justify-between mb-3">
+                <Typography variant="subtitle2" className="text-sm font-semibold text-gray-800">
+                    Response Settings
+                </Typography>
+                <IconButton
+                    size="small"
+                    onClick={onClose}
+                    className="text-gray-500 hover:text-gray-700"
+                    sx={{ padding: '4px' }}
                 >
-                    <FormControl size="small" className="min-w-32">
-                        <InputLabel id="tone-label">Tone</InputLabel>
-                        <Select
-                            labelId="tone-label"
-                            value={options.tone}
-                            onChange={handleToneChange}
-                            disabled={disabled}
-                            sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    backgroundColor: '#F0F0F0',
-                                    borderRadius: '8px',
-                                },
-                                '& .MuiSelect-select': {
-                                    color: '#333333',
-                                }
-                            }}
-                        >
-                            <MenuItem value="friendly">Friendly</MenuItem>
-                            <MenuItem value="formal">Formal</MenuItem>
-                            <MenuItem value="creative">Witty</MenuItem>
-                        </Select>
-                    </FormControl>
-                </Tooltip>
+                    <Close fontSize="small" />
+                </IconButton>
+            </Box>
 
-                {/* Response Length Slider */}
-                <Tooltip
-                    title="Adjust the detail level of AI responses"
-                    placement="top"
-                    arrow
-                >
-                    <Box className="min-w-48">
-                        <Typography variant="body2" className="text-gray-700 mb-2 font-medium">
-                            Response Length
-                        </Typography>
+            {/* Controls */}
+            <Box className="space-y-4">
+                {/* Tone */}
+                <Box className="space-y-2">
+                    <CustomDropdown
+                        label="Tone"
+                        options={toneOptions}
+                        value={options.tone}
+                        onChange={handleToneChange}
+                    />
+                </Box>
+
+                {/* Response Length */}
+                <Box className="space-y-2">
+                    <Typography variant="caption" className="text-xs font-medium text-gray-700 block">
+                        Response Length
+                    </Typography>
+                    <Box className="px-1">
                         <Slider
-                            value={getSliderValue()}
-                            onChange={handleLengthSliderChange}
-                            disabled={disabled}
-                            min={0}
+                            value={options.responseLength === 'short' ? 1 : options.responseLength === 'medium' ? 2 : 3}
+                            onChange={handleLengthChange}
+                            min={1}
                             max={3}
                             step={1}
                             marks={[
-                                { value: 0, label: 'Short' },
-                                { value: 1, label: 'Medium' },
-                                { value: 2, label: 'Long' },
+                                { value: 1, label: 'Short' },
+                                { value: 2, label: 'Medium' },
+                                { value: 3, label: 'Long' },
                             ]}
                             sx={{
-                                color: '#333333',
+                                color: '#6B7280',
                                 '& .MuiSlider-thumb': {
-                                    backgroundColor: '#333333',
+                                    backgroundColor: '#374151',
                                 },
                                 '& .MuiSlider-track': {
-                                    backgroundColor: '#333333',
+                                    backgroundColor: '#6B7280',
                                 },
-                                '& .MuiSlider-rail': {
-                                    backgroundColor: '#E5E5E5',
+                                '& .MuiSlider-mark': {
+                                    backgroundColor: '#9CA3AF',
                                 },
                                 '& .MuiSlider-markLabel': {
-                                    color: '#666666',
                                     fontSize: '0.75rem',
-                                }
+                                    color: '#6B7280',
+                                },
                             }}
                         />
                     </Box>
-                </Tooltip>
+                    <Typography variant="caption" className="text-xs text-gray-600 text-center block">
+                        {options.responseLength === 'short' ? 'Short' : options.responseLength === 'medium' ? 'Medium' : 'Long'}
+                    </Typography>
+                </Box>
 
                 {/* Model Choice */}
-                <Tooltip
-                    title="Select the AI model for generating responses"
-                    placement="top"
-                    arrow
-                >
-                    <FormControl size="small" className="min-w-32">
-                        <InputLabel id="model-label">Model</InputLabel>
-                        <Select
-                            labelId="model-label"
-                            value={options.model}
-                            onChange={handleModelChange}
-                            disabled={disabled}
-                            sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    backgroundColor: '#F0F0F0',
-                                    borderRadius: '8px',
-                                },
-                                '& .MuiSelect-select': {
-                                    color: '#333333',
-                                }
-                            }}
-                        >
-                            <MenuItem value="gpt-3.5-turbo">GPT-3</MenuItem>
-                            <MenuItem value="gpt-4">GPT-4</MenuItem>
-                            <MenuItem value="claude-3">Custom</MenuItem>
-                        </Select>
-                    </FormControl>
-                </Tooltip>
+                <Box className="space-y-2">
+                    <CustomDropdown
+                        label="Model Choice"
+                        options={modelOptions}
+                        value={options.model}
+                        onChange={handleModelChange}
+                    />
+                </Box>
             </Box>
         </Box>
     );
