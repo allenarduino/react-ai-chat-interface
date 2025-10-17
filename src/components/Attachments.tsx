@@ -7,7 +7,13 @@ import {
     ImageOutlined,
     PictureAsPdfOutlined,
     VideoFileOutlined,
-    InsertDriveFileOutlined
+    InsertDriveFileOutlined,
+    AudioFileOutlined,
+    DescriptionOutlined,
+    CodeOutlined,
+    ArchiveOutlined,
+    TableChartOutlined,
+    SlideshowOutlined
 } from '@mui/icons-material';
 import type { Attachment } from '../types/chat';
 import { generateAttachmentId, getAttachmentTypeFromMime, formatFileSize, validateFileSize, validateFileType } from '../utils/format';
@@ -111,20 +117,57 @@ const Attachments: React.FC<AttachmentsProps> = ({
     const getFileIcon = (mimeType: string, fileName: string) => {
         const fileExtension = fileName.split('.').pop()?.toLowerCase();
 
-        // Check MIME type first, then fallback to extension
-        if (mimeType.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].includes(fileExtension || '')) {
-            return <ImageOutlined style={{ fontSize: '18px', color: '#374151' }} aria-label="Image file" />;
+        // Images
+        if (mimeType.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'tiff'].includes(fileExtension || '')) {
+            return <ImageOutlined style={{ fontSize: '18px', color: '#3B82F6' }} aria-label="Image file" />;
         }
 
+        // PDF
         if (mimeType === 'application/pdf' || fileExtension === 'pdf') {
-            return <PictureAsPdfOutlined style={{ fontSize: '18px', color: '#374151' }} aria-label="PDF file" />;
+            return <PictureAsPdfOutlined style={{ fontSize: '18px', color: '#EF4444' }} aria-label="PDF file" />;
         }
 
-        if (mimeType.startsWith('video/') || ['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm', 'mkv'].includes(fileExtension || '')) {
-            return <VideoFileOutlined style={{ fontSize: '18px', color: '#374151' }} aria-label="Video file" />;
+        // Videos
+        if (mimeType.startsWith('video/') || ['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm', 'mkv', 'quicktime'].includes(fileExtension || '')) {
+            return <VideoFileOutlined style={{ fontSize: '18px', color: '#8B5CF6' }} aria-label="Video file" />;
         }
 
-        return <InsertDriveFileOutlined style={{ fontSize: '18px', color: '#374151' }} aria-label="Document file" />;
+        // Audio
+        if (mimeType.startsWith('audio/') || ['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a'].includes(fileExtension || '')) {
+            return <AudioFileOutlined style={{ fontSize: '18px', color: '#10B981' }} aria-label="Audio file" />;
+        }
+
+        // Word documents
+        if (mimeType === 'application/msword' || mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+            ['doc', 'docx'].includes(fileExtension || '')) {
+            return <DescriptionOutlined style={{ fontSize: '18px', color: '#2563EB' }} aria-label="Word document" />;
+        }
+
+        // Excel spreadsheets
+        if (mimeType === 'application/vnd.ms-excel' || mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+            ['xls', 'xlsx'].includes(fileExtension || '')) {
+            return <TableChartOutlined style={{ fontSize: '18px', color: '#059669' }} aria-label="Excel spreadsheet" />;
+        }
+
+        // PowerPoint presentations
+        if (mimeType === 'application/vnd.ms-powerpoint' || mimeType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
+            ['ppt', 'pptx'].includes(fileExtension || '')) {
+            return <SlideshowOutlined style={{ fontSize: '18px', color: '#DC2626' }} aria-label="PowerPoint presentation" />;
+        }
+
+        // Code files
+        if (mimeType.startsWith('text/') && ['js', 'ts', 'jsx', 'tsx', 'css', 'html', 'json', 'xml', 'py', 'java', 'c', 'cpp', 'md'].includes(fileExtension || '')) {
+            return <CodeOutlined style={{ fontSize: '18px', color: '#7C3AED' }} aria-label="Code file" />;
+        }
+
+        // Archives
+        if (mimeType.includes('zip') || mimeType.includes('rar') || mimeType.includes('7z') || mimeType.includes('tar') || mimeType.includes('gzip') ||
+            ['zip', 'rar', '7z', 'tar', 'gz'].includes(fileExtension || '')) {
+            return <ArchiveOutlined style={{ fontSize: '18px', color: '#F59E0B' }} aria-label="Archive file" />;
+        }
+
+        // Default document
+        return <InsertDriveFileOutlined style={{ fontSize: '18px', color: '#6B7280' }} aria-label="Document file" />;
     };
 
     const isNearLimit = attachments.length >= maxFiles - 1;
@@ -218,7 +261,7 @@ const Attachments: React.FC<AttachmentsProps> = ({
                     multiple
                     onChange={handleFileSelect}
                     className="hidden"
-                    accept={SUPPORTED_FILE_TYPES.map(type => `.${type.split('/')[1]}`).join(',')}
+                    accept=".jpg,.jpeg,.png,.gif,.webp,.svg,.bmp,.tiff,.pdf,.txt,.csv,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.rtf,.md,.mp3,.wav,.ogg,.aac,.flac,.m4a,.mp4,.webm,.avi,.mov,.wmv,.flv,.mkv,.zip,.rar,.7z,.tar,.gz,.js,.ts,.jsx,.tsx,.css,.html,.json,.xml,.py,.java,.c,.cpp"
                     disabled={disabled}
                 />
 
@@ -322,7 +365,7 @@ const Attachments: React.FC<AttachmentsProps> = ({
                         multiple
                         onChange={handleFileSelect}
                         className="hidden"
-                        accept={SUPPORTED_FILE_TYPES.map(type => `.${type.split('/')[1]}`).join(',')}
+                        accept=".jpg,.jpeg,.png,.gif,.webp,.svg,.bmp,.tiff,.pdf,.txt,.csv,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.rtf,.md,.mp3,.wav,.ogg,.aac,.flac,.m4a,.mp4,.webm,.avi,.mov,.wmv,.flv,.mkv,.zip,.rar,.7z,.tar,.gz,.js,.ts,.jsx,.tsx,.css,.html,.json,.xml,.py,.java,.c,.cpp"
                         disabled={disabled}
                     />
 
