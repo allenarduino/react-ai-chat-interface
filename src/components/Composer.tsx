@@ -211,7 +211,7 @@ const Composer: React.FC<ComposerProps> = ({
             {/* Help text */}
             <Box
                 id="message-help-text"
-                className="mt-2 text-xs text-gray-500"
+                className="mt-2 ml-14 text-xs text-gray-500"
                 role="note"
                 aria-live="polite"
             >
