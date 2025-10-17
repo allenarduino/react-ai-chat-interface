@@ -190,28 +190,21 @@ const Composer: React.FC<ComposerProps> = ({
                     whileTap={canSend ? { scale: 0.95 } : {}}
                     transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 >
-                    <IconButton
+                    <button
                         onClick={handleSend}
                         disabled={!canSend}
-                        className={`${canSend
-                            ? 'bg-black text-white hover:bg-gray-800'
-                            : 'bg-gray-300 text-gray-500'
+                        className={`px-5 py-2 rounded-lg transition-colors font-medium flex items-center justify-center ${canSend
+                            ? 'bg-black hover:bg-gray-800 text-white'
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                             }`}
-                        sx={{
-                            borderRadius: '12px',
+                        style={{
                             minWidth: '48px',
                             height: '48px',
-                            transition: 'all 0.2s ease-in-out',
                         }}
                         aria-label="Send message"
                     >
-                        <motion.div
-                            animate={canSend ? { rotate: 0 } : { rotate: 0 }}
-                            transition={{ duration: 0.2 }}
-                        >
-                            <Send />
-                        </motion.div>
-                    </IconButton>
+                        <Send fontSize="small" />
+                    </button>
                 </motion.div>
             </Box>
 
