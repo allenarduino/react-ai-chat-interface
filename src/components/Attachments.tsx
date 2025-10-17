@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Box, Chip, Typography, Alert, IconButton } from '@mui/material';
-import { Close, CloudUpload, ErrorOutline } from '@mui/icons-material';
+import { Close, AttachFile, ErrorOutline } from '@mui/icons-material';
 import type { Attachment } from '../types/chat';
 import { generateAttachmentId, getAttachmentTypeFromMime, formatFileSize, validateFileSize, validateFileType } from '../utils/format';
 import { SUPPORTED_FILE_TYPES, MAX_ATTACHMENT_SIZE } from '../types/chat';
@@ -11,6 +11,8 @@ interface AttachmentsProps {
     maxFiles?: number;
     maxFileSize?: number;
     disabled?: boolean;
+    showOnlyChips?: boolean;
+    showOnlyButton?: boolean;
 }
 
 const Attachments: React.FC<AttachmentsProps> = ({
@@ -18,9 +20,10 @@ const Attachments: React.FC<AttachmentsProps> = ({
     onAttachmentsChange,
     maxFiles = 5,
     maxFileSize = MAX_ATTACHMENT_SIZE,
-    disabled = false
+    disabled = false,
+    showOnlyChips = false,
+    showOnlyButton = false
 }) => {
-    const [isDragOver, setIsDragOver] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -75,27 +78,6 @@ const Attachments: React.FC<AttachmentsProps> = ({
         }
     }, [attachments, validateFiles, onAttachmentsChange]);
 
-    const handleDragOver = useCallback((e: React.DragEvent) => {
-        e.preventDefault();
-        if (!disabled) {
-            setIsDragOver(true);
-        }
-    }, [disabled]);
-
-    const handleDragLeave = useCallback((e: React.DragEvent) => {
-        e.preventDefault();
-        setIsDragOver(false);
-    }, []);
-
-    const handleDrop = useCallback((e: React.DragEvent) => {
-        e.preventDefault();
-        setIsDragOver(false);
-
-        if (disabled) return;
-
-        const files = Array.from(e.dataTransfer.files);
-        processFiles(files);
-    }, [disabled, processFiles]);
 
     const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);
@@ -114,6 +96,81 @@ const Attachments: React.FC<AttachmentsProps> = ({
     const isNearLimit = attachments.length >= maxFiles - 1;
     const isAtLimit = attachments.length >= maxFiles;
 
+    // Show only chips (for file preview above input)
+    if (showOnlyChips) {
+        return (
+            <Box className="w-full">
+                {/* Error Messages */}
+                {error && (
+                    <Alert
+                        severity="error"
+                        icon={<ErrorOutline />}
+                        className="mb-3"
+                        onClose={() => setError(null)}
+                    >
+                        {error}
+                    </Alert>
+                )}
+
+                {/* Attached Files Chips */}
+                <Box className="flex flex-wrap gap-2">
+                    {attachments.map((attachment) => (
+                        <Chip
+                            key={attachment.id}
+                            label={`${attachment.name} (${formatFileSize(attachment.size)})`}
+                            onDelete={() => handleRemove(attachment.id)}
+                            deleteIcon={<Close />}
+                            size="small"
+                            disabled={disabled}
+                            className="bg-gray-100 text-gray-800 hover:bg-gray-200"
+                            sx={{
+                                '& .MuiChip-deleteIcon': {
+                                    color: '#666666',
+                                    '&:hover': {
+                                        color: '#333333',
+                                    },
+                                },
+                            }}
+                        />
+                    ))}
+                </Box>
+            </Box>
+        );
+    }
+
+    // Show only button (for inline with input)
+    if (showOnlyButton) {
+        return (
+            <Box className="flex items-center justify-center">
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    onChange={handleFileSelect}
+                    className="hidden"
+                    accept={SUPPORTED_FILE_TYPES.map(type => `.${type.split('/')[1]}`).join(',')}
+                    disabled={disabled}
+                />
+
+                <IconButton
+                    onClick={() => !disabled && fileInputRef.current?.click()}
+                    disabled={disabled}
+                    className="bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800"
+                    sx={{
+                        borderRadius: '8px',
+                        width: '40px',
+                        height: '40px',
+                        transition: 'all 0.2s ease-in-out',
+                    }}
+                    aria-label="Attach files"
+                >
+                    <AttachFile />
+                </IconButton>
+            </Box>
+        );
+    }
+
+    // Full component (default behavior)
     return (
         <Box className="w-full">
             {/* Error Messages */}
@@ -160,31 +217,9 @@ const Attachments: React.FC<AttachmentsProps> = ({
                 </Box>
             )}
 
-            {/* Drag & Drop Area */}
+            {/* File Upload Button */}
             {!isAtLimit && (
-                <Box
-                    className={`
-            relative border-2 border-dashed rounded-lg p-6 text-center transition-colors
-            ${isDragOver
-                            ? 'border-black bg-gray-100'
-                            : 'border-gray-300 bg-gray-50 hover:bg-gray-100'
-                        }
-            ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-          `}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                    onClick={() => !disabled && fileInputRef.current?.click()}
-                    role="button"
-                    tabIndex={disabled ? -1 : 0}
-                    aria-label="Upload files by clicking or dragging and dropping"
-                    onKeyDown={(e) => {
-                        if ((e.key === 'Enter' || e.key === ' ') && !disabled) {
-                            e.preventDefault();
-                            fileInputRef.current?.click();
-                        }
-                    }}
-                >
+                <Box className="flex items-center justify-center">
                     <input
                         ref={fileInputRef}
                         type="file"
@@ -195,30 +230,20 @@ const Attachments: React.FC<AttachmentsProps> = ({
                         disabled={disabled}
                     />
 
-                    <CloudUpload
-                        className={`text-4xl mb-2 ${isDragOver ? 'text-black' : 'text-gray-400'}`}
-                    />
-
-                    <Typography
-                        variant="body2"
-                        className={`font-medium ${isDragOver ? 'text-black' : 'text-gray-600'}`}
+                    <IconButton
+                        onClick={() => !disabled && fileInputRef.current?.click()}
+                        disabled={disabled}
+                        className="bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800"
+                        sx={{
+                            borderRadius: '8px',
+                            width: '40px',
+                            height: '40px',
+                            transition: 'all 0.2s ease-in-out',
+                        }}
+                        aria-label="Attach files"
                     >
-                        {isDragOver ? 'Drop files here' : 'Click to upload or drag and drop'}
-                    </Typography>
-
-                    <Typography
-                        variant="caption"
-                        className="text-gray-500 mt-1 block"
-                    >
-                        Max {maxFiles} files, {formatFileSize(maxFileSize)} each
-                    </Typography>
-
-                    <Typography
-                        variant="caption"
-                        className="text-gray-400 mt-1 block"
-                    >
-                        {SUPPORTED_FILE_TYPES.join(', ')}
-                    </Typography>
+                        <AttachFile />
+                    </IconButton>
                 </Box>
             )}
 

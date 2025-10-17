@@ -56,15 +56,29 @@ const Composer: React.FC<ComposerProps> = ({
 
     return (
         <Box className="border-t border-gray-200 p-4 bg-white">
-            {/* Attachments Component */}
-            <Attachments
-                attachments={attachments}
-                onAttachmentsChange={onAttachmentsChange}
-                disabled={disabled}
-            />
+            {/* Attached Files Preview */}
+            {attachments.length > 0 && (
+                <Box className="mb-3">
+                    <Attachments
+                        attachments={attachments}
+                        onAttachmentsChange={onAttachmentsChange}
+                        disabled={disabled}
+                        showOnlyChips={true}
+                    />
+                </Box>
+            )}
 
             {/* Message Input */}
-            <Box className="flex items-end space-x-2 mt-3">
+            <Box className="flex items-end space-x-2">
+                {/* File attachment button */}
+                <Box className="flex-shrink-0">
+                    <Attachments
+                        attachments={[]}
+                        onAttachmentsChange={onAttachmentsChange}
+                        disabled={disabled}
+                        showOnlyButton={true}
+                    />
+                </Box>
 
                 {/* Textarea */}
                 <TextField
