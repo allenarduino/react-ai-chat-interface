@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Box } from '@mui/material';
+import { motion } from 'framer-motion';
 import type { Message } from '../types/chat';
 import MessageBubble from './MessageBubble';
 
@@ -22,10 +23,20 @@ const MessageList: React.FC<MessageListProps> = ({ messages }) => {
             aria-relevant="additions"
             className="flex-1 overflow-y-auto p-4 space-y-4"
         >
-            {messages.map((m) => (
-                <div key={m.id} className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+            {messages.map((m, index) => (
+                <motion.div
+                    key={m.id}
+                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{
+                        duration: 0.4,
+                        delay: index * 0.1,
+                        ease: "easeOut"
+                    }}
+                    className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
                     <MessageBubble message={m} />
-                </div>
+                </motion.div>
             ))}
             <div ref={endRef} />
         </Box>

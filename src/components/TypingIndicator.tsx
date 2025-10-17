@@ -1,0 +1,74 @@
+import React from 'react';
+import { Box, Typography } from '@mui/material';
+import { motion } from 'framer-motion';
+
+const TypingIndicator: React.FC = () => {
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+        >
+            <Box
+                className="flex items-start space-x-3 p-4"
+                role="status"
+                aria-busy="true"
+                aria-label="AI is typing"
+            >
+                {/* AI Avatar */}
+                <Box
+                    className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0"
+                    sx={{ minWidth: '32px', minHeight: '32px' }}
+                >
+                    <Typography
+                        variant="caption"
+                        className="text-white font-semibold text-xs"
+                    >
+                        AI
+                    </Typography>
+                </Box>
+
+                {/* Typing Animation */}
+                <Box className="flex-1">
+                    <Box
+                        className="bg-gray-100 rounded-2xl rounded-tl-sm px-4 py-3 max-w-xs"
+                        sx={{
+                            backgroundColor: '#F3F4F6',
+                            borderRadius: '18px 18px 18px 4px',
+                        }}
+                    >
+                        <Box className="flex items-center space-x-1">
+                            <Typography
+                                variant="body2"
+                                className="text-gray-600 text-sm"
+                            >
+                                AI is typing
+                            </Typography>
+                            <Box className="flex space-x-1">
+                                {[0, 1, 2].map((index) => (
+                                    <motion.div
+                                        key={index}
+                                        className="w-1.5 h-1.5 bg-gray-400 rounded-full"
+                                        animate={{
+                                            scale: [1, 1.2, 1],
+                                            opacity: [0.4, 1, 0.4],
+                                        }}
+                                        transition={{
+                                            duration: 1.2,
+                                            repeat: Infinity,
+                                            delay: index * 0.2,
+                                            ease: "easeInOut",
+                                        }}
+                                    />
+                                ))}
+                            </Box>
+                        </Box>
+                    </Box>
+                </Box>
+            </Box>
+        </motion.div>
+    );
+};
+
+export default TypingIndicator;

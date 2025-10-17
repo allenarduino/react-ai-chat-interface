@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Box } from '@mui/material';
+import { AnimatePresence } from 'framer-motion';
 import type { Message, Attachment, ChatOptions } from '../types/chat';
 import { DEFAULT_CHAT_OPTIONS } from '../types/chat';
 import { generateMessageId } from '../utils/format';
 import MessageList from '../components/MessageList';
 import Composer from '../components/Composer';
+import TypingIndicator from '../components/TypingIndicator';
 
 const Home: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([
@@ -36,31 +38,43 @@ const Home: React.FC = () => {
 
     const [attachedFiles, setAttachedFiles] = useState<Attachment[]>([]);
     const [options, setOptions] = useState<ChatOptions>(DEFAULT_CHAT_OPTIONS);
+    const [isTyping, setIsTyping] = useState(false);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    // Auto-scroll to bottom when new messages arrive
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages, isTyping]);
 
     const handleSendMessage = (text: string, options: ChatOptions, attachments: Attachment[]) => {
-        const message: Message = {
+        // Add user message immediately
+        const userMessage: Message = {
             id: generateMessageId(),
             text,
             sender: 'user',
             timestamp: new Date(),
             attachments,
-            status: 'sending'
+            status: 'sent'
         };
 
-        setMessages(prev => [...prev, message]);
+        setMessages(prev => [...prev, userMessage]);
         setAttachedFiles([]);
 
-        // Update message status to sent
-        setTimeout(() => {
-            setMessages(prev =>
-                prev.map(msg =>
-                    msg.id === message.id ? { ...msg, status: 'sent' } : msg
-                )
-            );
-        }, 500);
+        // Show typing indicator
+        setIsTyping(true);
 
-        // Simulate agent response
+        // Generate random delay between 300-800ms
+        const typingDelay = Math.random() * 500 + 300;
+
         setTimeout(() => {
+            // Hide typing indicator
+            setIsTyping(false);
+
+            // Generate AI response
             const agentMessage: Message = {
                 id: generateMessageId(),
                 text: `Thanks for your message! I'm processing your request with ${options.tone} tone and ${options.responseLength} length using ${options.model}...`,
@@ -69,15 +83,26 @@ const Home: React.FC = () => {
                 attachments: [],
                 status: 'delivered'
             };
+
             setMessages(prev => [...prev, agentMessage]);
-        }, 1000);
+        }, typingDelay);
     };
 
 
     return (
         <Box className="flex flex-col h-full">
             {/* Chat Messages Area */}
-            <MessageList messages={messages} />
+            <Box className="flex-1 overflow-y-auto">
+                <MessageList messages={messages} />
+
+                {/* Typing Indicator */}
+                <AnimatePresence>
+                    {isTyping && <TypingIndicator />}
+                </AnimatePresence>
+
+                {/* Scroll anchor */}
+                <div ref={messagesEndRef} />
+            </Box>
 
             {/* Composer Section */}
             <Composer
