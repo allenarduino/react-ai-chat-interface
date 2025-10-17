@@ -1,48 +1,65 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Box, TextField, IconButton, Chip, Select, MenuItem, FormControl, InputLabel, Typography } from '@mui/material';
+import type { SelectChangeEvent } from '@mui/material/Select';
 import { Send, AttachFile, Close } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
-
-interface Message {
-    id: string;
-    text: string;
-    sender: 'user' | 'agent';
-    timestamp: Date;
-}
-
-interface AttachedFile {
-    id: string;
-    name: string;
-    size: number;
-}
+import type {
+    Message,
+    Attachment,
+    ChatOptions,
+    ToneType,
+    ResponseLengthType,
+    ModelType,
+} from '../types/chat';
+import {
+    TONE_OPTIONS,
+    RESPONSE_LENGTH_OPTIONS,
+    MODEL_OPTIONS,
+    DEFAULT_CHAT_OPTIONS,
+    SUPPORTED_FILE_TYPES,
+    MAX_ATTACHMENT_SIZE,
+} from '../types/chat';
+import {
+    formatTimestamp,
+    formatFileSize,
+    generateMessageId,
+    generateAttachmentId,
+    getAttachmentTypeFromMime,
+    validateFileSize,
+    validateFileType,
+} from '../utils/format';
 
 const Home: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([
         {
-            id: '1',
+            id: generateMessageId(),
             text: 'Hello! How can I help you today?',
             sender: 'agent',
-            timestamp: new Date(Date.now() - 300000)
+            timestamp: new Date(Date.now() - 300000),
+            attachments: [],
+            status: 'delivered'
         },
         {
-            id: '2',
+            id: generateMessageId(),
             text: 'Hi! I need help with my React project.',
             sender: 'user',
-            timestamp: new Date(Date.now() - 240000)
+            timestamp: new Date(Date.now() - 240000),
+            attachments: [],
+            status: 'delivered'
         },
         {
-            id: '3',
+            id: generateMessageId(),
             text: 'I\'d be happy to help you with your React project! What specific issues are you facing?',
             sender: 'agent',
-            timestamp: new Date(Date.now() - 180000)
+            timestamp: new Date(Date.now() - 180000),
+            attachments: [],
+            status: 'delivered'
         }
     ]);
 
     const [newMessage, setNewMessage] = useState('');
-    const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
-    const [tone, setTone] = useState('professional');
-    const [responseLength, setResponseLength] = useState('medium');
-    const [model, setModel] = useState('gpt-4');
+    const [attachedFiles, setAttachedFiles] = useState<Attachment[]>([]);
+    const [options, setOptions] = useState<ChatOptions>(DEFAULT_CHAT_OPTIONS);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -58,22 +75,36 @@ const Home: React.FC = () => {
     const handleSendMessage = () => {
         if (newMessage.trim()) {
             const message: Message = {
-                id: Date.now().toString(),
+                id: generateMessageId(),
                 text: newMessage,
                 sender: 'user',
-                timestamp: new Date()
+                timestamp: new Date(),
+                attachments: attachedFiles,
+                status: 'sending'
             };
 
             setMessages(prev => [...prev, message]);
             setNewMessage('');
+            setAttachedFiles([]);
+
+            // Update message status to sent
+            setTimeout(() => {
+                setMessages(prev =>
+                    prev.map(msg =>
+                        msg.id === message.id ? { ...msg, status: 'sent' } : msg
+                    )
+                );
+            }, 500);
 
             // Simulate agent response
             setTimeout(() => {
                 const agentMessage: Message = {
-                    id: (Date.now() + 1).toString(),
+                    id: generateMessageId(),
                     text: 'Thanks for your message! I\'m processing your request...',
                     sender: 'agent',
-                    timestamp: new Date()
+                    timestamp: new Date(),
+                    attachments: [],
+                    status: 'delivered'
                 };
                 setMessages(prev => [...prev, agentMessage]);
             }, 1000);
@@ -89,10 +120,19 @@ const Home: React.FC = () => {
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);
-        const newFiles: AttachedFile[] = files.map(file => ({
-            id: Date.now().toString() + Math.random(),
+        const validFiles = files.filter(file => {
+            const isValidSize = validateFileSize(file.size, MAX_ATTACHMENT_SIZE);
+            const isValidType = validateFileType(file.type, SUPPORTED_FILE_TYPES);
+            return isValidSize && isValidType;
+        });
+
+        const newFiles: Attachment[] = validFiles.map(file => ({
+            id: generateAttachmentId(),
             name: file.name,
-            size: file.size
+            size: file.size,
+            type: getAttachmentTypeFromMime(file.type),
+            mimeType: file.type,
+            uploadedAt: new Date()
         }));
 
         if (attachedFiles.length + newFiles.length <= 5) {
@@ -102,18 +142,6 @@ const Home: React.FC = () => {
 
     const removeFile = (fileId: string) => {
         setAttachedFiles(prev => prev.filter(file => file.id !== fileId));
-    };
-
-    const formatFileSize = (bytes: number) => {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    };
-
-    const formatTime = (date: Date) => {
-        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
     return (
@@ -154,7 +182,7 @@ const Home: React.FC = () => {
                                         className={`text-gray-500 text-xs mt-1 ${message.sender === 'user' ? 'text-right' : 'text-left'
                                             }`}
                                     >
-                                        {formatTime(message.timestamp)}
+                                        {formatTimestamp(message.timestamp, 'time')}
                                     </Typography>
                                 </Box>
 
@@ -192,28 +220,46 @@ const Home: React.FC = () => {
                 <Box className="flex space-x-4 mb-3">
                     <FormControl size="small" className="min-w-24">
                         <InputLabel>Tone</InputLabel>
-                        <Select value={tone} onChange={(e) => setTone(e.target.value)}>
-                            <MenuItem value="professional">Professional</MenuItem>
-                            <MenuItem value="casual">Casual</MenuItem>
-                            <MenuItem value="friendly">Friendly</MenuItem>
+                        <Select
+                            value={options.tone}
+                            onChange={(e: SelectChangeEvent<ToneType>) =>
+                                setOptions(prev => ({ ...prev, tone: e.target.value as ToneType }))}
+                        >
+                            {TONE_OPTIONS.map(option => (
+                                <MenuItem key={option.value} value={option.value}>
+                                    {option.label}
+                                </MenuItem>
+                            ))}
                         </Select>
                     </FormControl>
 
                     <FormControl size="small" className="min-w-32">
                         <InputLabel>Length</InputLabel>
-                        <Select value={responseLength} onChange={(e) => setResponseLength(e.target.value)}>
-                            <MenuItem value="short">Short</MenuItem>
-                            <MenuItem value="medium">Medium</MenuItem>
-                            <MenuItem value="long">Long</MenuItem>
+                        <Select
+                            value={options.responseLength}
+                            onChange={(e: SelectChangeEvent<ResponseLengthType>) =>
+                                setOptions(prev => ({ ...prev, responseLength: e.target.value as ResponseLengthType }))}
+                        >
+                            {RESPONSE_LENGTH_OPTIONS.map(option => (
+                                <MenuItem key={option.value} value={option.value}>
+                                    {option.label}
+                                </MenuItem>
+                            ))}
                         </Select>
                     </FormControl>
 
                     <FormControl size="small" className="min-w-28">
                         <InputLabel>Model</InputLabel>
-                        <Select value={model} onChange={(e) => setModel(e.target.value)}>
-                            <MenuItem value="gpt-4">GPT-4</MenuItem>
-                            <MenuItem value="gpt-3.5">GPT-3.5</MenuItem>
-                            <MenuItem value="claude">Claude</MenuItem>
+                        <Select
+                            value={options.model}
+                            onChange={(e: SelectChangeEvent<ModelType>) =>
+                                setOptions(prev => ({ ...prev, model: e.target.value as ModelType }))}
+                        >
+                            {MODEL_OPTIONS.map(option => (
+                                <MenuItem key={option.value} value={option.value}>
+                                    {option.label}
+                                </MenuItem>
+                            ))}
                         </Select>
                     </FormControl>
                 </Box>
