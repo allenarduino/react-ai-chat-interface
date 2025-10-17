@@ -46,12 +46,10 @@ const Attachments: React.FC<AttachmentsProps> = ({
         const validFiles: File[] = [];
         const errors: string[] = [];
 
-        console.log('Validating files:', files.length, 'Current attachments:', attachments.length, 'Max files:', maxFiles);
 
         // Check if adding all files would exceed the limit
         if (attachments.length + files.length > maxFiles) {
             const errorMsg = `Cannot add ${files.length} files. Only ${maxFiles - attachments.length} more files allowed.`;
-            console.log('File limit exceeded:', errorMsg);
             errors.push(errorMsg);
             return { valid: [], errors };
         }
@@ -72,18 +70,14 @@ const Attachments: React.FC<AttachmentsProps> = ({
             validFiles.push(file);
         });
 
-        console.log('Validation complete - Valid files:', validFiles.length, 'Errors:', errors.length);
         return { valid: validFiles, errors };
     }, [attachments.length, maxFiles, maxFileSize]);
 
     const processFiles = useCallback((files: File[]) => {
-        console.log('Processing files:', files.length, 'Current attachments:', attachments.length);
         const { valid, errors } = validateFiles(files);
 
-        console.log('Validation result - Valid:', valid.length, 'Errors:', errors.length);
 
         if (errors.length > 0) {
-            console.log('Setting error:', errors.join('; '));
             setError(errors.join('; '));
             setTimeout(() => setError(null), 5000); // Clear error after 5 seconds
             return; // Don't process any files if there are errors
@@ -99,15 +93,12 @@ const Attachments: React.FC<AttachmentsProps> = ({
                 uploadedAt: new Date()
             }));
 
-            console.log('Adding new attachments:', newAttachments.length);
             onAttachmentsChange((prevAttachments: Attachment[]) => {
-                console.log('Previous attachments count:', prevAttachments.length);
                 const updated = [...prevAttachments, ...newAttachments];
-                console.log('Updated attachments count:', updated.length);
                 return updated;
             });
         }
-    }, [validateFiles, onAttachmentsChange, attachments.length]);
+    }, [validateFiles, onAttachmentsChange]);
 
 
     const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -190,9 +181,7 @@ const Attachments: React.FC<AttachmentsProps> = ({
 
     const isNearLimit = attachments.length >= maxFiles - 1;
     const isAtLimit = attachments.length >= maxFiles;
-    const canUploadMore = attachments.length < maxFiles;
 
-    console.log('DEBUG - Attachments count:', attachments.length, 'Max files:', maxFiles, 'Can upload more:', canUploadMore, 'Show button:', attachments.length < 5);
 
     // Show only chips (for file preview above input)
     if (showOnlyChips) {
