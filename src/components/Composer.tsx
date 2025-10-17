@@ -9,7 +9,7 @@ interface ComposerProps {
     onSend: (text: string, options: ChatOptions, attachments: Attachment[]) => void;
     options: ChatOptions;
     attachments: Attachment[];
-    onAttachmentsChange: (attachments: Attachment[]) => void;
+    onAttachmentsChange: (attachments: Attachment[] | ((prev: Attachment[]) => Attachment[])) => void;
     disabled?: boolean;
     placeholder?: string;
 }
@@ -59,12 +59,15 @@ const Composer: React.FC<ComposerProps> = ({
             {/* Attached Files Preview */}
             {attachments.length > 0 && (
                 <Box className="mb-3">
-                    <Attachments
-                        attachments={attachments}
-                        onAttachmentsChange={onAttachmentsChange}
-                        disabled={disabled}
-                        showOnlyChips={true}
-                    />
+                    {/* Attachment chips */}
+                    <Box className="mb-2">
+                        <Attachments
+                            attachments={attachments}
+                            onAttachmentsChange={onAttachmentsChange}
+                            disabled={disabled}
+                            showOnlyChips={true}
+                        />
+                    </Box>
                 </Box>
             )}
 
@@ -73,7 +76,7 @@ const Composer: React.FC<ComposerProps> = ({
                 {/* File attachment button */}
                 <Box className="flex-shrink-0">
                     <Attachments
-                        attachments={[]}
+                        attachments={attachments}
                         onAttachmentsChange={onAttachmentsChange}
                         disabled={disabled}
                         showOnlyButton={true}

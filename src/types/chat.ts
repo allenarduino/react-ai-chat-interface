@@ -218,18 +218,66 @@ export const DEFAULT_AGENT_STYLE: AgentReplyStyle = {
 export const MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024; // 10MB
 export const MAX_ATTACHMENTS = 5;
 export const SUPPORTED_FILE_TYPES = [
+    // Images
     'image/jpeg',
+    'image/jpg',
     'image/png',
     'image/gif',
     'image/webp',
+    'image/svg+xml',
+    'image/bmp',
+    'image/tiff',
+
+    // Documents
     'application/pdf',
     'text/plain',
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'text/csv',
+    'application/msword', // .doc
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+    'application/vnd.ms-excel', // .xls
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+    'application/vnd.ms-powerpoint', // .ppt
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
+    'application/rtf',
+    'text/markdown',
+
+    // Audio
     'audio/mpeg',
+    'audio/mp3',
     'audio/wav',
+    'audio/ogg',
+    'audio/aac',
+    'audio/flac',
+    'audio/m4a',
+
+    // Video
     'video/mp4',
     'video/webm',
+    'video/avi',
+    'video/mov',
+    'video/wmv',
+    'video/flv',
+    'video/mkv',
+    'video/quicktime',
+
+    // Archives
+    'application/zip',
+    'application/x-rar-compressed',
+    'application/x-7z-compressed',
+    'application/x-tar',
+    'application/gzip',
+
+    // Code files
+    'text/javascript',
+    'text/typescript',
+    'text/css',
+    'text/html',
+    'application/json',
+    'application/xml',
+    'text/x-python',
+    'text/x-java-source',
+    'text/x-c',
+    'text/x-c++',
 ] as const;
 
 export const TONE_OPTIONS: { value: ToneType; label: string; description: string }[] = [
