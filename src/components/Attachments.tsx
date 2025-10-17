@@ -1,6 +1,14 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Box, Chip, Typography, Alert, IconButton } from '@mui/material';
-import { Close, AttachFile, ErrorOutline } from '@mui/icons-material';
+import {
+    Close,
+    AttachFile,
+    ErrorOutline,
+    ImageOutlined,
+    PictureAsPdfOutlined,
+    VideoFileOutlined,
+    InsertDriveFileOutlined
+} from '@mui/icons-material';
 import type { Attachment } from '../types/chat';
 import { generateAttachmentId, getAttachmentTypeFromMime, formatFileSize, validateFileSize, validateFileType } from '../utils/format';
 import { SUPPORTED_FILE_TYPES, MAX_ATTACHMENT_SIZE } from '../types/chat';
@@ -93,6 +101,26 @@ const Attachments: React.FC<AttachmentsProps> = ({
         onAttachmentsChange(attachments.filter(att => att.id !== attachmentId));
     }, [attachments, onAttachmentsChange]);
 
+    // File type detection and icon mapping
+    const getFileIcon = (mimeType: string, fileName: string) => {
+        const fileExtension = fileName.split('.').pop()?.toLowerCase();
+
+        // Check MIME type first, then fallback to extension
+        if (mimeType.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].includes(fileExtension || '')) {
+            return <ImageOutlined style={{ fontSize: '20px', color: 'white' }} aria-label="Image file" />;
+        }
+
+        if (mimeType === 'application/pdf' || fileExtension === 'pdf') {
+            return <PictureAsPdfOutlined style={{ fontSize: '20px', color: 'white' }} aria-label="PDF file" />;
+        }
+
+        if (mimeType.startsWith('video/') || ['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm', 'mkv'].includes(fileExtension || '')) {
+            return <VideoFileOutlined style={{ fontSize: '20px', color: 'white' }} aria-label="Video file" />;
+        }
+
+        return <InsertDriveFileOutlined style={{ fontSize: '20px', color: 'white' }} aria-label="Document file" />;
+    };
+
     const isNearLimit = attachments.length >= maxFiles - 1;
     const isAtLimit = attachments.length >= maxFiles;
 
@@ -117,18 +145,46 @@ const Attachments: React.FC<AttachmentsProps> = ({
                     {attachments.map((attachment) => (
                         <Chip
                             key={attachment.id}
+                            icon={getFileIcon(attachment.mimeType, attachment.name)}
                             label={`${attachment.name} (${formatFileSize(attachment.size)})`}
                             onDelete={() => handleRemove(attachment.id)}
                             deleteIcon={<Close />}
                             size="small"
                             disabled={disabled}
-                            className="bg-gray-100 text-gray-800 hover:bg-gray-200"
+                            className="bg-gray-800 text-white hover:bg-gray-700 transition-all duration-200"
                             sx={{
+                                borderRadius: '6px',
+                                padding: '6px 10px',
+                                height: '36px',
+                                minHeight: '36px',
+                                '& .MuiChip-icon': {
+                                    color: 'white !important',
+                                    marginRight: '8px',
+                                    fontSize: '20px !important',
+                                    width: '20px',
+                                    height: '20px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                },
+                                '& .MuiChip-label': {
+                                    color: 'white',
+                                    fontSize: '0.875rem',
+                                    fontWeight: 500,
+                                    lineHeight: 1.2,
+                                    paddingLeft: '4px',
+                                },
                                 '& .MuiChip-deleteIcon': {
-                                    color: '#666666',
+                                    color: '#cccccc',
+                                    fontSize: '18px',
+                                    width: '18px',
+                                    height: '18px',
                                     '&:hover': {
-                                        color: '#333333',
+                                        color: 'white',
                                     },
+                                },
+                                '&:hover': {
+                                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
                                 },
                             }}
                         />
@@ -198,18 +254,46 @@ const Attachments: React.FC<AttachmentsProps> = ({
                     {attachments.map((attachment) => (
                         <Chip
                             key={attachment.id}
+                            icon={getFileIcon(attachment.mimeType, attachment.name)}
                             label={`${attachment.name} (${formatFileSize(attachment.size)})`}
                             onDelete={() => handleRemove(attachment.id)}
                             deleteIcon={<Close />}
                             size="small"
                             disabled={disabled}
-                            className="bg-gray-100 text-gray-800 hover:bg-gray-200"
+                            className="bg-gray-800 text-white hover:bg-gray-700 transition-all duration-200"
                             sx={{
+                                borderRadius: '6px',
+                                padding: '6px 10px',
+                                height: '36px',
+                                minHeight: '36px',
+                                '& .MuiChip-icon': {
+                                    color: 'white !important',
+                                    marginRight: '8px',
+                                    fontSize: '20px !important',
+                                    width: '20px',
+                                    height: '20px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                },
+                                '& .MuiChip-label': {
+                                    color: 'white',
+                                    fontSize: '0.875rem',
+                                    fontWeight: 500,
+                                    lineHeight: 1.2,
+                                    paddingLeft: '4px',
+                                },
                                 '& .MuiChip-deleteIcon': {
-                                    color: '#666666',
+                                    color: '#cccccc',
+                                    fontSize: '18px',
+                                    width: '18px',
+                                    height: '18px',
                                     '&:hover': {
-                                        color: '#333333',
+                                        color: 'white',
                                     },
+                                },
+                                '&:hover': {
+                                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
                                 },
                             }}
                         />
