@@ -1,5 +1,5 @@
 import React from 'react';
-import { Avatar, Box, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { Message } from '../types/chat';
@@ -68,21 +68,42 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
         );
     }
 
-    // AI message styling (unchanged)
+    // AI message styling
     return (
-        <Box className="flex items-start space-x-2 max-w-xl justify-start">
-            {/* Avatar */}
-            <Avatar sx={{ width: 32, height: 32 }}>
-                AI
-            </Avatar>
+        <Box className="flex items-start space-x-3">
+            {/* AI Avatar */}
+            <img
+                src="/images/AI-avatar.jpg"
+                alt="AI Avatar"
+                className="w-8 h-8 rounded-full"
+            />
 
-            {/* Bubble */}
-            <Box className="bg-[#F5F5F5] text-[#333333] rounded-2xl rounded-bl-md px-4 py-2 shadow-sm" aria-label="agent message">
-                <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
-                    {message.text}
-                </ReactMarkdown>
+            <Box className="flex flex-col">
+                {/* Options indicator */}
+                {message.options && (
+                    <Typography
+                        variant="caption"
+                        className="text-xs text-gray-500 mb-1 ml-1"
+                    >
+                        {message.options.tone.charAt(0).toUpperCase() + message.options.tone.slice(1)} • {message.options.responseLength.charAt(0).toUpperCase() + message.options.responseLength.slice(1)} • {message.options.model.toUpperCase()}
+                    </Typography>
+                )}
 
-                <Typography variant="caption" className="mt-1 block text-gray-500 text-left">
+                {/* Message bubble */}
+                <Box
+                    className="bg-gray-100 text-gray-800 px-4 py-3 rounded-2xl rounded-tl-md max-w-md shadow-sm"
+                    aria-label="agent message"
+                >
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                        {message.text}
+                    </ReactMarkdown>
+                </Box>
+
+                {/* Timestamp */}
+                <Typography
+                    variant="caption"
+                    className="text-xs text-gray-500 mt-1 ml-1"
+                >
                     {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </Typography>
             </Box>

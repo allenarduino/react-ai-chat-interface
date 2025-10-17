@@ -58,7 +58,8 @@ const Home: React.FC = () => {
             sender: 'user',
             timestamp: new Date(),
             attachments,
-            status: 'sent'
+            status: 'sent',
+            options: options
         };
 
         setMessages(prev => [...prev, userMessage]);
@@ -81,7 +82,8 @@ const Home: React.FC = () => {
                 sender: 'agent',
                 timestamp: new Date(),
                 attachments: [],
-                status: 'delivered'
+                status: 'delivered',
+                options: options
             };
 
             setMessages(prev => [...prev, agentMessage]);

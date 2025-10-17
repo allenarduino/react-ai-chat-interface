@@ -91,6 +91,7 @@ export interface Message {
     replyTo?: MessageId; // for threaded conversations
     editedAt?: Date;
     reactions?: Reaction[];
+    options?: ChatOptions; // options used when this message was sent
 }
 
 // Message metadata
