@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Box, TextField, IconButton, Chip } from '@mui/material';
-import { Send, AttachFile, Close } from '@mui/icons-material';
+import { Box, TextField, IconButton } from '@mui/material';
+import { Send } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import type { ChatOptions, Attachment } from '../types/chat';
-import { formatFileSize, generateAttachmentId, getAttachmentTypeFromMime } from '../utils/format';
+import Attachments from './Attachments';
 
 interface ComposerProps {
     onSend: (text: string, options: ChatOptions, attachments: Attachment[]) => void;
@@ -25,7 +25,6 @@ const Composer: React.FC<ComposerProps> = ({
     const [message, setMessage] = useState('');
     const [isFocused, setIsFocused] = useState(false);
     const textareaRef = useRef<HTMLDivElement>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Auto-resize textarea based on content
     useEffect(() => {
@@ -52,67 +51,20 @@ const Composer: React.FC<ComposerProps> = ({
         }
     };
 
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = Array.from(e.target.files || []);
-        // File validation would be handled by parent component
-        // This is just for demonstration
-        const newAttachments: Attachment[] = files.map(file => ({
-            id: generateAttachmentId(),
-            name: file.name,
-            size: file.size,
-            type: getAttachmentTypeFromMime(file.type),
-            mimeType: file.type,
-            uploadedAt: new Date()
-        }));
-
-        onAttachmentsChange([...attachments, ...newAttachments]);
-    };
-
-    const removeAttachment = (attachmentId: string) => {
-        onAttachmentsChange(attachments.filter(att => att.id !== attachmentId));
-    };
 
     const canSend = message.trim().length > 0 && !disabled;
 
     return (
         <Box className="border-t border-gray-200 p-4 bg-white">
-            {/* Attached Files */}
-            {attachments.length > 0 && (
-                <Box className="mb-3 flex flex-wrap gap-2">
-                    {attachments.map((attachment) => (
-                        <Chip
-                            key={attachment.id}
-                            label={`${attachment.name} (${formatFileSize(attachment.size)})`}
-                            onDelete={() => removeAttachment(attachment.id)}
-                            deleteIcon={<Close />}
-                            size="small"
-                            className="bg-gray-100"
-                        />
-                    ))}
-                </Box>
-            )}
+            {/* Attachments Component */}
+            <Attachments
+                attachments={attachments}
+                onAttachmentsChange={onAttachmentsChange}
+                disabled={disabled}
+            />
 
             {/* Message Input */}
-            <Box className="flex items-end space-x-2">
-                {/* Hidden file input */}
-                <input
-                    ref={fileInputRef}
-                    type="file"
-                    multiple
-                    onChange={handleFileUpload}
-                    className="hidden"
-                    accept=".txt,.pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
-                />
-
-                {/* File attachment button */}
-                <IconButton
-                    onClick={() => fileInputRef.current?.click()}
-                    className="text-gray-500 hover:text-gray-700"
-                    disabled={disabled || attachments.length >= 5}
-                    aria-label="Attach file"
-                >
-                    <AttachFile />
-                </IconButton>
+            <Box className="flex items-end space-x-2 mt-3">
 
                 {/* Textarea */}
                 <TextField
