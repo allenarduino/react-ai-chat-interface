@@ -40,30 +40,49 @@ const markdownComponents = {
 const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
     const isUser = message.sender === 'user';
 
-    const bubbleClasses = isUser
-        ? 'bg-black text-white rounded-2xl rounded-br-md'
-        : 'bg-[#F5F5F5] text-[#333333] rounded-2xl rounded-bl-md';
+    if (isUser) {
+        return (
+            <Box className="flex items-start space-x-3 justify-end">
+                <Box className="flex flex-col items-end">
+                    <Box
+                        className="bg-black text-white px-4 py-3 rounded-2xl rounded-tr-md max-w-md shadow-sm"
+                        aria-label="user message"
+                    >
+                        <Typography variant="body1" className="whitespace-pre-wrap">
+                            {message.text}
+                        </Typography>
+                    </Box>
+                    <Typography
+                        variant="caption"
+                        className="text-xs text-gray-500 mt-1 mr-1"
+                    >
+                        {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </Typography>
+                </Box>
+                <img
+                    src="/images/allen-jones-image.jpeg"
+                    alt="User Avatar"
+                    className="w-8 h-8 rounded-full"
+                />
+            </Box>
+        );
+    }
 
+    // AI message styling (unchanged)
     return (
-        <Box className={`flex items-start space-x-2 max-w-xl ${isUser ? 'justify-end flex-row-reverse' : ''}`}>
+        <Box className="flex items-start space-x-2 max-w-xl justify-start">
             {/* Avatar */}
             <Avatar sx={{ width: 32, height: 32 }}>
-                {isUser ? 'U' : 'AI'}
+                AI
             </Avatar>
 
             {/* Bubble */}
-            <Box className={`px-4 py-2 shadow-sm ${bubbleClasses}`} aria-label={`${message.sender} message`}>
-                {isUser ? (
-                    <Typography variant="body1" className="whitespace-pre-wrap">
-                        {message.text}
-                    </Typography>
-                ) : (
-                    <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
-                        {message.text}
-                    </ReactMarkdown>
-                )}
+            <Box className="bg-[#F5F5F5] text-[#333333] rounded-2xl rounded-bl-md px-4 py-2 shadow-sm" aria-label="agent message">
+                <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                    {message.text}
+                </ReactMarkdown>
 
-                <Typography variant="caption" className={`mt-1 block text-gray-500 ${isUser ? 'text-right' : 'text-left'}`}>
+                <Typography variant="caption" className="mt-1 block text-gray-500 text-left">
                     {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </Typography>
             </Box>
