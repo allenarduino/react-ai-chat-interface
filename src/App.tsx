@@ -12,8 +12,8 @@ const theme = createTheme({
 function App() {
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
       <Router>
+        <CssBaseline />
         <div className="min-h-screen bg-gray-50">
           <Routes>
             <Route path="/" element={
