@@ -148,36 +148,48 @@ const Attachments: React.FC<AttachmentsProps> = ({
                             icon={getFileIcon(attachment.mimeType, attachment.name)}
                             label={
                                 <Box className="flex flex-col items-start">
-                                    <span className="text-sm font-medium">{attachment.name}</span>
+                                    <span className="font-medium">{attachment.name}</span>
                                     <span className="text-xs text-gray-500">{formatFileSize(attachment.size)}</span>
                                 </Box>
                             }
                             onDelete={() => handleRemove(attachment.id)}
                             deleteIcon={<Close />}
-                            size="small"
                             disabled={disabled}
-                            className="bg-gray-100 px-4 py-3 rounded-full text-sm text-gray-700 flex items-center space-x-2 file-chip hover:bg-gray-200 transition-all duration-200"
                             sx={{
+                                backgroundColor: '#F3F4F6',
+                                borderRadius: '9999px',
+                                padding: '8px 12px',
+                                height: 'auto',
+                                minHeight: '44px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                '&:hover': {
+                                    backgroundColor: '#E5E7EB',
+                                },
                                 '& .MuiChip-icon': {
                                     color: '#374151',
                                     fontSize: '18px',
                                     width: '18px',
                                     height: '18px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
+                                    marginLeft: 0,
+                                    marginRight: 0,
                                 },
                                 '& .MuiChip-label': {
+                                    padding: 0,
                                     color: '#374151',
                                     fontSize: '0.875rem',
-                                    fontWeight: 500,
-                                    lineHeight: 1.2,
+                                    lineHeight: 1.25,
+                                    overflow: 'visible',
+                                    textOverflow: 'clip',
                                 },
                                 '& .MuiChip-deleteIcon': {
                                     color: '#6B7280',
-                                    fontSize: '16px',
-                                    width: '16px',
-                                    height: '16px',
+                                    fontSize: '18px',
+                                    width: '18px',
+                                    height: '18px',
+                                    margin: 0,
+                                    marginLeft: '4px',
                                     '&:hover': {
                                         color: '#374151',
                                     },
@@ -261,7 +273,7 @@ const Attachments: React.FC<AttachmentsProps> = ({
                             deleteIcon={<Close />}
                             size="small"
                             disabled={disabled}
-                            className="bg-gray-100 px-4 py-3 rounded-full text-sm text-gray-700 flex items-center space-x-2 file-chip hover:bg-gray-200 transition-all duration-200"
+                            className="bg-gray-100 px-4 py-4 rounded-full text-sm text-gray-700 flex items-center space-x-2 file-chip hover:bg-gray-200 transition-all duration-200 min-h-[48px]"
                             sx={{
                                 '& .MuiChip-icon': {
                                     color: '#374151',
@@ -283,6 +295,8 @@ const Attachments: React.FC<AttachmentsProps> = ({
                                     fontSize: '16px',
                                     width: '16px',
                                     height: '16px',
+                                    marginLeft: '8px',
+                                    marginRight: '8px',
                                     '&:hover': {
                                         color: '#374151',
                                     },
