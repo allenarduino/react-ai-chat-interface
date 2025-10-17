@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Box, TextField, IconButton, Typography, Slider } from '@mui/material';
-import type { SelectChangeEvent } from '@mui/material';
 import { Send, Close, Tune } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import type { ChatOptions, Attachment } from '../types/chat';
 import Attachments from './Attachments';
+import { CustomDropdown, type Option } from './CustomDropdown';
 
 interface ComposerProps {
     onSend: (text: string, options: ChatOptions, attachments: Attachment[]) => void;
@@ -60,8 +60,22 @@ const Composer: React.FC<ComposerProps> = ({
 
     const canSend = message.trim().length > 0 && !disabled;
 
+    // Options for dropdowns
+    const toneOptions: Option[] = [
+        { id: 'professional', value: 'professional', name: 'Professional' },
+        { id: 'friendly', value: 'friendly', name: 'Friendly' },
+        { id: 'formal', value: 'formal', name: 'Formal' },
+        { id: 'creative', value: 'creative', name: 'Creative' },
+    ];
+
+    const modelOptions: Option[] = [
+        { id: 'gpt-3.5-turbo', value: 'gpt-3.5-turbo', name: 'GPT-3' },
+        { id: 'gpt-4', value: 'gpt-4', name: 'GPT-4' },
+        { id: 'claude-3.5-sonnet', value: 'claude-3.5-sonnet', name: 'Custom' },
+    ];
+
     // Handle options changes
-    const handleToneChange = (event: SelectChangeEvent) => {
+    const handleToneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         onOptionsChange({
             ...options,
             tone: event.target.value as 'professional' | 'friendly' | 'formal' | 'creative'
@@ -76,7 +90,7 @@ const Composer: React.FC<ComposerProps> = ({
         });
     };
 
-    const handleModelChange = (event: SelectChangeEvent) => {
+    const handleModelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         onOptionsChange({
             ...options,
             model: event.target.value as 'gpt-3.5-turbo' | 'gpt-4' | 'claude-3.5-sonnet'
@@ -84,17 +98,26 @@ const Composer: React.FC<ComposerProps> = ({
     };
 
     // Handle clicking outside the options panel
-    const handleContainerClick = (e: React.MouseEvent) => {
-        if (showOptionsPanel && optionsRef.current && !optionsRef.current.contains(e.target as Node)) {
-            setShowOptionsPanel(false);
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (showOptionsPanel && optionsRef.current && !optionsRef.current.contains(event.target as Node)) {
+                setShowOptionsPanel(false);
+            }
+        };
+
+        if (showOptionsPanel) {
+            document.addEventListener('mousedown', handleClickOutside);
         }
-    };
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showOptionsPanel]);
 
     return (
         <Box
             className="border-t border-gray-200 p-4 bg-white relative"
             sx={{ position: 'relative' }}
-            onClick={handleContainerClick}
         >
             {/* Attached Files Preview */}
             {attachments.length > 0 && (
@@ -115,7 +138,6 @@ const Composer: React.FC<ComposerProps> = ({
             {showOptionsPanel && (
                 <Box
                     ref={optionsRef}
-                    onClick={(e) => e.stopPropagation()}
                     sx={{
                         position: 'absolute',
                         right: '24px',
@@ -128,6 +150,7 @@ const Composer: React.FC<ComposerProps> = ({
                         padding: '16px',
                         width: '288px',
                         zIndex: 10001,
+                        overflow: 'visible',
                     }}
                 >
                     {/* Header */}
@@ -149,21 +172,13 @@ const Composer: React.FC<ComposerProps> = ({
                     <Box className="space-y-4">
                         {/* Tone */}
                         <Box className="space-y-2">
-                            <Typography variant="caption" className="text-xs font-medium text-gray-700 block">
-                                Tone
-                            </Typography>
-                            <select
+                            <CustomDropdown
+                                label="Tone"
+                                options={toneOptions}
                                 value={options.tone}
-                                onChange={(e) => {
-                                    handleToneChange({ target: { value: e.target.value } } as SelectChangeEvent);
-                                }}
-                                className="w-full px-3 py-2 mt-20  border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            >
-                                <option value="professional">Professional</option>
-                                <option value="friendly">Friendly</option>
-                                <option value="formal">Formal</option>
-                                <option value="creative">Creative</option>
-                            </select>
+                                onChange={handleToneChange}
+                                placeholder="Select tone"
+                            />
                         </Box>
 
                         {/* Response Length */}
@@ -208,20 +223,13 @@ const Composer: React.FC<ComposerProps> = ({
 
                         {/* Model Choice */}
                         <Box className="space-y-2">
-                            <Typography variant="caption" className="text-xs font-medium text-gray-700 block">
-                                Model Choice
-                            </Typography>
-                            <select
+                            <CustomDropdown
+                                label="Model Choice"
+                                options={modelOptions}
                                 value={options.model}
-                                onChange={(e) => {
-                                    handleModelChange({ target: { value: e.target.value } } as SelectChangeEvent);
-                                }}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            >
-                                <option value="gpt-3.5-turbo">GPT-3</option>
-                                <option value="gpt-4">GPT-4</option>
-                                <option value="claude-3.5-sonnet">Custom</option>
-                            </select>
+                                onChange={handleModelChange}
+                                placeholder="Select model..."
+                            />
                         </Box>
                     </Box>
                 </Box>
