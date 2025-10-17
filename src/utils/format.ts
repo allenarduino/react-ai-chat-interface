@@ -1,9 +1,7 @@
-import {
+import type {
     MessageId,
     UserId,
     AttachmentId,
-    Message,
-    Attachment,
     MessageStatus,
     AttachmentType
 } from '../types/chat';

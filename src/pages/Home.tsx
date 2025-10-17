@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Box, TextField, IconButton, Chip, Select, MenuItem, FormControl, InputLabel, Typography } from '@mui/material';
+import { Box, TextField, IconButton, Chip, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material/Select';
 import { Send, AttachFile, Close } from '@mui/icons-material';
-import { motion, AnimatePresence } from 'framer-motion';
 import type {
     Message,
     Attachment,
@@ -20,7 +19,6 @@ import {
     MAX_ATTACHMENT_SIZE,
 } from '../types/chat';
 import {
-    formatTimestamp,
     formatFileSize,
     generateMessageId,
     generateAttachmentId,
@@ -28,12 +26,13 @@ import {
     validateFileSize,
     validateFileType,
 } from '../utils/format';
+import MessageList from '../components/MessageList';
 
 const Home: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([
         {
             id: generateMessageId(),
-            text: 'Hello! How can I help you today?',
+            text: 'Hello! I\'m your AI assistant. How can I help you today?\n\nHere\'s what I can do:\n\n- **Explain** concepts\n- **Generate** content\n- Answer with `inline code` or links like [Tailwind](https://tailwindcss.com)\n\n1. Ask a question\n2. Share context\n3. Get an answer',
             sender: 'agent',
             timestamp: new Date(Date.now() - 300000),
             attachments: [],
@@ -49,7 +48,7 @@ const Home: React.FC = () => {
         },
         {
             id: generateMessageId(),
-            text: 'I\'d be happy to help you with your React project! What specific issues are you facing?',
+            text: 'I\'d be happy to help with your React project!\n\nTry this next:\n\n- Create a component named **MessageBubble**\n- Support `inline code` and lists\n\n```js\nconst x = 42;\nconsole.log(x);\n```',
             sender: 'agent',
             timestamp: new Date(Date.now() - 180000),
             attachments: [],
@@ -147,56 +146,7 @@ const Home: React.FC = () => {
     return (
         <Box className="flex flex-col h-full">
             {/* Chat Messages Area */}
-            <Box className="flex-1 overflow-y-auto p-4 space-y-4">
-                <AnimatePresence>
-                    {messages.map((message) => (
-                        <motion.div
-                            key={message.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            transition={{ duration: 0.3 }}
-                            className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                        >
-                            <Box className={`flex items-start space-x-2 max-w-xs lg:max-w-md`}>
-                                {message.sender === 'agent' && (
-                                    <Box className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-sm font-medium text-gray-600">
-                                        AI
-                                    </Box>
-                                )}
-
-                                <Box className="flex flex-col">
-                                    <Box
-                                        className={`px-4 py-2 rounded-2xl shadow-sm ${message.sender === 'user'
-                                            ? 'bg-black text-white rounded-br-md'
-                                            : 'bg-gray-100 text-gray-800 rounded-bl-md'
-                                            }`}
-                                    >
-                                        <Typography variant="body1" className="whitespace-pre-wrap">
-                                            {message.text}
-                                        </Typography>
-                                    </Box>
-
-                                    <Typography
-                                        variant="caption"
-                                        className={`text-gray-500 text-xs mt-1 ${message.sender === 'user' ? 'text-right' : 'text-left'
-                                            }`}
-                                    >
-                                        {formatTimestamp(message.timestamp, 'time')}
-                                    </Typography>
-                                </Box>
-
-                                {message.sender === 'user' && (
-                                    <Box className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-sm font-medium text-white">
-                                        U
-                                    </Box>
-                                )}
-                            </Box>
-                        </motion.div>
-                    ))}
-                </AnimatePresence>
-                <div ref={messagesEndRef} />
-            </Box>
+            <MessageList messages={messages} />
 
             {/* Composer Section */}
             <Box className="border-t border-gray-200 p-4 bg-white">

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
     formatTimestamp,
     formatFileSize,
@@ -19,7 +19,7 @@ import {
     generateUserId,
     generateAttachmentId
 } from '../utils/format';
-import { MessageStatus, AttachmentType } from '../types/chat';
+// Removed unused type imports that caused TS errors
 
 describe('formatTimestamp', () => {
     beforeEach(() => {
