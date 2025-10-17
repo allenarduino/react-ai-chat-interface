@@ -15,7 +15,7 @@ import { SUPPORTED_FILE_TYPES, MAX_ATTACHMENT_SIZE } from '../types/chat';
 
 interface AttachmentsProps {
     attachments: Attachment[];
-    onAttachmentsChange: (attachments: Attachment[]) => void;
+    onAttachmentsChange: (attachments: Attachment[] | ((prev: Attachment[]) => Attachment[])) => void;
     maxFiles?: number;
     maxFileSize?: number;
     disabled?: boolean;
@@ -34,6 +34,7 @@ const Attachments: React.FC<AttachmentsProps> = ({
 }) => {
     const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const buttonFileInputRef = useRef<HTMLInputElement>(null);
 
     const validateFiles = useCallback((files: File[]): { valid: File[]; errors: string[] } => {
         const validFiles: File[] = [];
@@ -65,6 +66,7 @@ const Attachments: React.FC<AttachmentsProps> = ({
     }, [attachments.length, maxFiles, maxFileSize]);
 
     const processFiles = useCallback((files: File[]) => {
+        console.log('Processing files:', files.length);
         const { valid, errors } = validateFiles(files);
 
         if (errors.length > 0) {
@@ -82,9 +84,15 @@ const Attachments: React.FC<AttachmentsProps> = ({
                 uploadedAt: new Date()
             }));
 
-            onAttachmentsChange([...attachments, ...newAttachments]);
+            console.log('Adding new attachments:', newAttachments.length);
+            onAttachmentsChange((prevAttachments: Attachment[]) => {
+                console.log('Previous attachments count:', prevAttachments.length);
+                const updated = [...prevAttachments, ...newAttachments];
+                console.log('Updated attachments count:', updated.length);
+                return updated;
+            });
         }
-    }, [attachments, validateFiles, onAttachmentsChange]);
+    }, [validateFiles, onAttachmentsChange]);
 
 
     const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,9 +100,7 @@ const Attachments: React.FC<AttachmentsProps> = ({
         processFiles(files);
 
         // Reset input value to allow selecting the same file again
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-        }
+        e.target.value = '';
     }, [processFiles]);
 
     const handleRemove = useCallback((attachmentId: string) => {
@@ -207,7 +213,7 @@ const Attachments: React.FC<AttachmentsProps> = ({
         return (
             <Box className="flex items-center justify-center">
                 <input
-                    ref={fileInputRef}
+                    ref={buttonFileInputRef}
                     type="file"
                     multiple
                     onChange={handleFileSelect}
@@ -217,7 +223,7 @@ const Attachments: React.FC<AttachmentsProps> = ({
                 />
 
                 <IconButton
-                    onClick={() => !disabled && fileInputRef.current?.click()}
+                    onClick={() => !disabled && buttonFileInputRef.current?.click()}
                     disabled={disabled}
                     className="bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800"
                     sx={{
