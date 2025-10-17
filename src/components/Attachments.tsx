@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { Box, Chip, Typography, Alert, IconButton } from '@mui/material';
+import { Box, Chip, Typography, Alert, IconButton, Tooltip } from '@mui/material';
 import {
     Close,
     AttachFile,
@@ -46,6 +46,16 @@ const Attachments: React.FC<AttachmentsProps> = ({
         const validFiles: File[] = [];
         const errors: string[] = [];
 
+        console.log('Validating files:', files.length, 'Current attachments:', attachments.length, 'Max files:', maxFiles);
+
+        // Check if adding all files would exceed the limit
+        if (attachments.length + files.length > maxFiles) {
+            const errorMsg = `Cannot add ${files.length} files. Only ${maxFiles - attachments.length} more files allowed.`;
+            console.log('File limit exceeded:', errorMsg);
+            errors.push(errorMsg);
+            return { valid: [], errors };
+        }
+
         files.forEach(file => {
             // Check file size
             if (!validateFileSize(file.size, maxFileSize)) {
@@ -59,25 +69,24 @@ const Attachments: React.FC<AttachmentsProps> = ({
                 return;
             }
 
-            // Check total file count
-            if (attachments.length + validFiles.length >= maxFiles) {
-                errors.push(`Maximum ${maxFiles} files allowed`);
-                return;
-            }
-
             validFiles.push(file);
         });
 
+        console.log('Validation complete - Valid files:', validFiles.length, 'Errors:', errors.length);
         return { valid: validFiles, errors };
     }, [attachments.length, maxFiles, maxFileSize]);
 
     const processFiles = useCallback((files: File[]) => {
-        console.log('Processing files:', files.length);
+        console.log('Processing files:', files.length, 'Current attachments:', attachments.length);
         const { valid, errors } = validateFiles(files);
 
+        console.log('Validation result - Valid:', valid.length, 'Errors:', errors.length);
+
         if (errors.length > 0) {
+            console.log('Setting error:', errors.join('; '));
             setError(errors.join('; '));
             setTimeout(() => setError(null), 5000); // Clear error after 5 seconds
+            return; // Don't process any files if there are errors
         }
 
         if (valid.length > 0) {
@@ -98,16 +107,25 @@ const Attachments: React.FC<AttachmentsProps> = ({
                 return updated;
             });
         }
-    }, [validateFiles, onAttachmentsChange]);
+    }, [validateFiles, onAttachmentsChange, attachments.length]);
 
 
     const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);
+
+        // Simple check: if more than 5 files, don't attach any files
+        if (attachments.length >= 5) {
+            setError(`Maximum 5 files already attached. Remove a file to add more.`);
+            setTimeout(() => setError(null), 5000);
+            e.target.value = '';
+            return;
+        }
+
         processFiles(files);
 
         // Reset input value to allow selecting the same file again
         e.target.value = '';
-    }, [processFiles]);
+    }, [processFiles, attachments.length]);
 
     const handleRemove = useCallback((attachmentId: string) => {
         onAttachmentsChange(attachments.filter(att => att.id !== attachmentId));
@@ -172,6 +190,9 @@ const Attachments: React.FC<AttachmentsProps> = ({
 
     const isNearLimit = attachments.length >= maxFiles - 1;
     const isAtLimit = attachments.length >= maxFiles;
+    const canUploadMore = attachments.length < maxFiles;
+
+    console.log('DEBUG - Attachments count:', attachments.length, 'Max files:', maxFiles, 'Can upload more:', canUploadMore, 'Show button:', attachments.length < 5);
 
     // Show only chips (for file preview above input)
     if (showOnlyChips) {
@@ -247,12 +268,22 @@ const Attachments: React.FC<AttachmentsProps> = ({
                         />
                     ))}
                 </Box>
+
+                {/* File Summary */}
+                {attachments.length > 0 && (
+                    <Box className="mt-3 text-sm text-gray-600">
+                        <span className="font-medium">{attachments.length}</span>/{maxFiles} files attached (max {maxFiles} files) • Total: {formatFileSize(attachments.reduce((total, file) => total + file.size, 0))}
+                    </Box>
+                )}
             </Box>
         );
     }
 
     // Show only button (for inline with input)
     if (showOnlyButton) {
+        const isAtLimit = attachments.length >= maxFiles;
+        const canUploadMore = attachments.length < maxFiles;
+
         return (
             <Box className="flex items-center justify-center">
                 <input
@@ -262,26 +293,41 @@ const Attachments: React.FC<AttachmentsProps> = ({
                     onChange={handleFileSelect}
                     className="hidden"
                     accept=".jpg,.jpeg,.png,.gif,.webp,.svg,.bmp,.tiff,.pdf,.txt,.csv,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.rtf,.md,.mp3,.wav,.ogg,.aac,.flac,.m4a,.mp4,.webm,.avi,.mov,.wmv,.flv,.mkv,.zip,.rar,.7z,.tar,.gz,.js,.ts,.jsx,.tsx,.css,.html,.json,.xml,.py,.java,.c,.cpp"
-                    disabled={disabled}
+                    disabled={disabled || isAtLimit}
                 />
 
-                <IconButton
-                    onClick={() => !disabled && buttonFileInputRef.current?.click()}
-                    disabled={disabled}
-                    className="bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800"
-                    sx={{
-                        borderRadius: '8px',
-                        width: '40px',
-                        height: '40px',
-                        transition: 'all 0.2s ease-in-out',
-                    }}
-                    aria-label="Attach files"
+                <Tooltip
+                    title={
+                        isAtLimit
+                            ? "Maximum file upload limit (5 files) reached"
+                            : "Attach files"
+                    }
+                    arrow
                 >
-                    <AttachFile />
-                </IconButton>
+                    <span>
+                        <IconButton
+                            onClick={() => !disabled && canUploadMore && buttonFileInputRef.current?.click()}
+                            disabled={disabled || isAtLimit}
+                            className={`${isAtLimit
+                                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                : 'bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800'
+                                }`}
+                            sx={{
+                                borderRadius: '8px',
+                                width: '40px',
+                                height: '40px',
+                                transition: 'all 0.2s ease-in-out',
+                            }}
+                            aria-label="Attach files"
+                        >
+                            <AttachFile />
+                        </IconButton>
+                    </span>
+                </Tooltip>
             </Box>
         );
     }
+
 
     // Full component (default behavior)
     return (
@@ -307,57 +353,64 @@ const Attachments: React.FC<AttachmentsProps> = ({
 
             {/* Attached Files Chips */}
             {attachments.length > 0 && (
-                <Box className="mb-3 flex flex-wrap gap-2">
-                    {attachments.map((attachment) => (
-                        <Chip
-                            key={attachment.id}
-                            icon={getFileIcon(attachment.mimeType, attachment.name)}
-                            label={
-                                <Box className="flex flex-col items-start">
-                                    <span className="text-sm font-medium">{attachment.name}</span>
-                                    <span className="text-xs text-gray-500">{formatFileSize(attachment.size)}</span>
-                                </Box>
-                            }
-                            onDelete={() => handleRemove(attachment.id)}
-                            deleteIcon={<Close />}
-                            size="small"
-                            disabled={disabled}
-                            className="bg-gray-100 px-4 py-4 rounded-full text-sm text-gray-700 flex items-center space-x-2 file-chip hover:bg-gray-200 transition-all duration-200 min-h-[48px]"
-                            sx={{
-                                '& .MuiChip-icon': {
-                                    color: '#374151',
-                                    fontSize: '18px',
-                                    width: '18px',
-                                    height: '18px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                },
-                                '& .MuiChip-label': {
-                                    color: '#374151',
-                                    fontSize: '0.875rem',
-                                    fontWeight: 500,
-                                    lineHeight: 1.2,
-                                },
-                                '& .MuiChip-deleteIcon': {
-                                    color: '#6B7280',
-                                    fontSize: '16px',
-                                    width: '16px',
-                                    height: '16px',
-                                    marginLeft: '8px',
-                                    marginRight: '8px',
-                                    '&:hover': {
+                <Box className="mb-3">
+                    <Box className="flex flex-wrap gap-2">
+                        {attachments.map((attachment) => (
+                            <Chip
+                                key={attachment.id}
+                                icon={getFileIcon(attachment.mimeType, attachment.name)}
+                                label={
+                                    <Box className="flex flex-col items-start">
+                                        <span className="text-sm font-medium">{attachment.name}</span>
+                                        <span className="text-xs text-gray-500">{formatFileSize(attachment.size)}</span>
+                                    </Box>
+                                }
+                                onDelete={() => handleRemove(attachment.id)}
+                                deleteIcon={<Close />}
+                                size="small"
+                                disabled={disabled}
+                                className="bg-gray-100 px-4 py-4 rounded-full text-sm text-gray-700 flex items-center space-x-2 file-chip hover:bg-gray-200 transition-all duration-200 min-h-[48px]"
+                                sx={{
+                                    '& .MuiChip-icon': {
                                         color: '#374151',
+                                        fontSize: '18px',
+                                        width: '18px',
+                                        height: '18px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
                                     },
-                                },
-                            }}
-                        />
-                    ))}
+                                    '& .MuiChip-label': {
+                                        color: '#374151',
+                                        fontSize: '0.875rem',
+                                        fontWeight: 500,
+                                        lineHeight: 1.2,
+                                    },
+                                    '& .MuiChip-deleteIcon': {
+                                        color: '#6B7280',
+                                        fontSize: '16px',
+                                        width: '16px',
+                                        height: '16px',
+                                        marginLeft: '8px',
+                                        marginRight: '8px',
+                                        '&:hover': {
+                                            color: '#374151',
+                                        },
+                                    },
+                                }}
+                            />
+                        ))}
+                    </Box>
+
+                    {/* File Summary */}
+                    <Box className="mt-3 text-sm text-gray-600">
+                        <span className="font-medium">{attachments.length}</span>/{maxFiles} files attached (max {maxFiles} files) • Total: {formatFileSize(attachments.reduce((total, file) => total + file.size, 0))}
+                    </Box>
                 </Box>
             )}
 
             {/* File Upload Button */}
-            {!isAtLimit && (
+            {attachments.length < 5 && (
                 <Box className="flex items-center justify-center">
                     <input
                         ref={fileInputRef}
