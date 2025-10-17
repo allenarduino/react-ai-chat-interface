@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Box, TextField, IconButton } from '@mui/material';
-import { Send } from '@mui/icons-material';
+import { Box, TextField, IconButton, Typography, Select, MenuItem, Slider } from '@mui/material';
+import type { SelectChangeEvent } from '@mui/material';
+import { Send, Close, Tune } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import type { ChatOptions, Attachment } from '../types/chat';
 import Attachments from './Attachments';
@@ -8,6 +9,7 @@ import Attachments from './Attachments';
 interface ComposerProps {
     onSend: (text: string, options: ChatOptions, attachments: Attachment[]) => void;
     options: ChatOptions;
+    onOptionsChange: (options: ChatOptions) => void;
     attachments: Attachment[];
     onAttachmentsChange: (attachments: Attachment[] | ((prev: Attachment[]) => Attachment[])) => void;
     disabled?: boolean;
@@ -17,6 +19,7 @@ interface ComposerProps {
 const Composer: React.FC<ComposerProps> = ({
     onSend,
     options,
+    onOptionsChange,
     attachments,
     onAttachmentsChange,
     disabled = false,
@@ -24,7 +27,9 @@ const Composer: React.FC<ComposerProps> = ({
 }) => {
     const [message, setMessage] = useState('');
     const [isFocused, setIsFocused] = useState(false);
+    const [showOptionsPanel, setShowOptionsPanel] = useState(false);
     const textareaRef = useRef<HTMLDivElement>(null);
+    const optionsRef = useRef<HTMLDivElement>(null);
 
     // Auto-resize textarea based on content
     useEffect(() => {
@@ -33,6 +38,7 @@ const Composer: React.FC<ComposerProps> = ({
             textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
         }
     }, [message]);
+
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -54,8 +60,42 @@ const Composer: React.FC<ComposerProps> = ({
 
     const canSend = message.trim().length > 0 && !disabled;
 
+    // Handle options changes
+    const handleToneChange = (event: SelectChangeEvent) => {
+        onOptionsChange({
+            ...options,
+            tone: event.target.value as 'friendly' | 'formal' | 'creative'
+        });
+    };
+
+    const handleLengthChange = (_: Event, newValue: number | number[]) => {
+        const lengthValue = newValue === 1 ? 'short' : newValue === 2 ? 'medium' : 'long';
+        onOptionsChange({
+            ...options,
+            responseLength: lengthValue as 'short' | 'medium' | 'long'
+        });
+    };
+
+    const handleModelChange = (event: SelectChangeEvent) => {
+        onOptionsChange({
+            ...options,
+            model: event.target.value as 'gpt-3.5-turbo' | 'gpt-4' | 'claude-3.5-sonnet'
+        });
+    };
+
+    // Handle clicking outside the options panel
+    const handleContainerClick = (e: React.MouseEvent) => {
+        if (showOptionsPanel && optionsRef.current && !optionsRef.current.contains(e.target as Node)) {
+            setShowOptionsPanel(false);
+        }
+    };
+
     return (
-        <Box className="border-t border-gray-200 p-4 bg-white">
+        <Box
+            className="border-t border-gray-200 p-4 bg-white relative"
+            sx={{ position: 'relative' }}
+            onClick={handleContainerClick}
+        >
             {/* Attached Files Preview */}
             {attachments.length > 0 && (
                 <Box className="mb-3">
@@ -67,6 +107,149 @@ const Composer: React.FC<ComposerProps> = ({
                             disabled={disabled}
                             showOnlyChips={true}
                         />
+                    </Box>
+                </Box>
+            )}
+
+            {/* Options Panel */}
+            {showOptionsPanel && (
+                <Box
+                    ref={optionsRef}
+                    onClick={(e) => e.stopPropagation()}
+                    sx={{
+                        position: 'absolute',
+                        right: '24px',
+                        bottom: '100%',
+                        marginBottom: '8px',
+                        backgroundColor: '#F9FAFB',
+                        border: '1px solid #E5E7EB',
+                        borderRadius: '12px',
+                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                        padding: '16px',
+                        width: '288px',
+                        zIndex: 9999,
+                    }}
+                >
+                    {/* Header */}
+                    <Box className="flex items-center justify-between mb-3">
+                        <Typography variant="subtitle2" className="text-sm font-semibold text-gray-800">
+                            Response Settings
+                        </Typography>
+                        <IconButton
+                            size="small"
+                            onClick={() => setShowOptionsPanel(false)}
+                            className="text-gray-500 hover:text-gray-700"
+                            sx={{ padding: '4px' }}
+                        >
+                            <Close fontSize="small" />
+                        </IconButton>
+                    </Box>
+
+                    {/* Controls */}
+                    <Box className="space-y-4">
+                        {/* Tone */}
+                        <Box className="space-y-2">
+                            <Typography variant="caption" className="text-xs font-medium text-gray-700 block">
+                                Tone
+                            </Typography>
+                            <Select
+                                value={options.tone}
+                                onChange={handleToneChange}
+                                size="small"
+                                className="w-full"
+                                sx={{
+                                    backgroundColor: 'white',
+                                    borderRadius: '8px',
+                                    fontSize: '14px',
+                                    '& .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: '#E5E7EB',
+                                    },
+                                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: '#D1D5DB',
+                                    },
+                                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: '#9CA3AF',
+                                        boxShadow: '0 0 0 2px rgba(156, 163, 175, 0.2)',
+                                    },
+                                }}
+                            >
+                                <MenuItem value="friendly">Friendly</MenuItem>
+                                <MenuItem value="formal">Formal</MenuItem>
+                                <MenuItem value="creative">Creative</MenuItem>
+                            </Select>
+                        </Box>
+
+                        {/* Response Length */}
+                        <Box className="space-y-2">
+                            <Typography variant="caption" className="text-xs font-medium text-gray-700 block">
+                                Response Length
+                            </Typography>
+                            <Box className="px-1">
+                                <Slider
+                                    value={options.responseLength === 'short' ? 1 : options.responseLength === 'medium' ? 2 : 3}
+                                    onChange={handleLengthChange}
+                                    min={1}
+                                    max={3}
+                                    step={1}
+                                    marks={[
+                                        { value: 1, label: 'Short' },
+                                        { value: 2, label: 'Medium' },
+                                        { value: 3, label: 'Long' },
+                                    ]}
+                                    sx={{
+                                        color: '#6B7280',
+                                        '& .MuiSlider-thumb': {
+                                            backgroundColor: '#374151',
+                                        },
+                                        '& .MuiSlider-track': {
+                                            backgroundColor: '#6B7280',
+                                        },
+                                        '& .MuiSlider-mark': {
+                                            backgroundColor: '#9CA3AF',
+                                        },
+                                        '& .MuiSlider-markLabel': {
+                                            fontSize: '0.75rem',
+                                            color: '#6B7280',
+                                        },
+                                    }}
+                                />
+                            </Box>
+                            <Typography variant="caption" className="text-xs text-gray-600 text-center block">
+                                {options.responseLength === 'short' ? 'Short' : options.responseLength === 'medium' ? 'Medium' : 'Long'}
+                            </Typography>
+                        </Box>
+
+                        {/* Model Choice */}
+                        <Box className="space-y-2">
+                            <Typography variant="caption" className="text-xs font-medium text-gray-700 block">
+                                Model Choice
+                            </Typography>
+                            <Select
+                                value={options.model}
+                                onChange={handleModelChange}
+                                size="small"
+                                className="w-full"
+                                sx={{
+                                    backgroundColor: 'white',
+                                    borderRadius: '8px',
+                                    fontSize: '14px',
+                                    '& .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: '#E5E7EB',
+                                    },
+                                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: '#D1D5DB',
+                                    },
+                                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: '#9CA3AF',
+                                        boxShadow: '0 0 0 2px rgba(156, 163, 175, 0.2)',
+                                    },
+                                }}
+                            >
+                                <MenuItem value="gpt-3.5-turbo">GPT-3</MenuItem>
+                                <MenuItem value="gpt-4">GPT-4</MenuItem>
+                                <MenuItem value="claude-3.5-sonnet">Custom</MenuItem>
+                            </Select>
+                        </Box>
                     </Box>
                 </Box>
             )}
@@ -130,6 +313,22 @@ const Composer: React.FC<ComposerProps> = ({
                         'aria-describedby': 'message-help-text',
                     }}
                 />
+
+                {/* Settings button */}
+                <IconButton
+                    onClick={() => setShowOptionsPanel(!showOptionsPanel)}
+                    disabled={disabled}
+                    className="text-gray-500 hover:text-gray-700"
+                    sx={{
+                        borderRadius: '8px',
+                        width: '40px',
+                        height: '40px',
+                        transition: 'all 0.2s ease-in-out',
+                    }}
+                    aria-label="Response settings"
+                >
+                    <Tune />
+                </IconButton>
 
                 {/* Send button with animation */}
                 <motion.div

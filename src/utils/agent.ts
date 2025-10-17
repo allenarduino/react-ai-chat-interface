@@ -133,6 +133,7 @@ const generateAgentReply = (
             break;
     }
 
+
     return {
         id: generateMessageId(),
         text: replyText,
