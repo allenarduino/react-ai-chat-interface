@@ -18,15 +18,14 @@ const TypingIndicator: React.FC = () => {
             >
                 {/* AI Avatar */}
                 <Box
-                    className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0"
+                    className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0"
                     sx={{ minWidth: '32px', minHeight: '32px' }}
                 >
-                    <Typography
-                        variant="caption"
-                        className="text-white font-semibold text-xs"
-                    >
-                        AI
-                    </Typography>
+                    <img
+                        src="/images/AI-avatar.jpg"
+                        alt="AI Avatar"
+                        className="w-full h-full object-cover"
+                    />
                 </Box>
 
                 {/* Typing Animation */}
