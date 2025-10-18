@@ -10,6 +10,7 @@ interface MessageListProps {
 
 const MessageList: React.FC<MessageListProps> = ({ messages }) => {
     const endRef = useRef<HTMLDivElement>(null);
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [isScrolling, setIsScrolling] = useState(false);
     const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -34,7 +35,7 @@ const MessageList: React.FC<MessageListProps> = ({ messages }) => {
             }, 150);
         };
 
-        const scrollContainer = document.querySelector('.overflow-y-auto');
+        const scrollContainer = scrollContainerRef.current;
         if (scrollContainer) {
             scrollContainer.addEventListener('scroll', handleScroll);
             return () => {
@@ -48,6 +49,7 @@ const MessageList: React.FC<MessageListProps> = ({ messages }) => {
 
     return (
         <Box
+            ref={scrollContainerRef}
             role="log"
             aria-live="polite"
             aria-relevant="additions"
