@@ -27,14 +27,42 @@ const AppShell: React.FC<AppShellProps> = ({ children, onClearConversation }) =>
                 }}
             >
                 <Toolbar className="px-4 py-3">
-                    <Typography
-                        variant="h5"
-                        component="h1"
-                        className="font-bold text-gray-800 flex-1"
-                        sx={{ fontWeight: 700 }}
-                    >
-                        AI Chat Interface
-                    </Typography>
+                    {/* AI Avatar and Name */}
+                    <Box className="flex items-center space-x-3 flex-1">
+                        {/* AI Avatar */}
+                        <Box
+                            className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0"
+                            sx={{ minWidth: '40px', minHeight: '40px' }}
+                        >
+                            <img
+                                src="/images/AI-avatar.jpg"
+                                alt="AI Avatar"
+                                className="w-full h-full object-cover"
+                            />
+                        </Box>
+
+                        {/* Name and Status */}
+                        <Box className="flex flex-col">
+                            <Typography
+                                variant="h6"
+                                component="h1"
+                                className="font-bold text-gray-800"
+                                sx={{ fontWeight: 700, fontSize: '1.125rem', lineHeight: 1.2 }}
+                            >
+                                AI Chatbot
+                            </Typography>
+                            <Box className="flex items-center space-x-1">
+                                <Box className="w-2 h-2 bg-green-500 rounded-full"></Box>
+                                <Typography
+                                    variant="caption"
+                                    className="text-gray-600"
+                                    sx={{ fontSize: '0.75rem' }}
+                                >
+                                    Online
+                                </Typography>
+                            </Box>
+                        </Box>
+                    </Box>
 
                     {/* Clear Conversation Button */}
                     {onClearConversation && (
@@ -63,12 +91,6 @@ const AppShell: React.FC<AppShellProps> = ({ children, onClearConversation }) =>
                             <span className="sm:hidden">Clear</span>
                         </Button>
                     )}
-
-                    {/* Mode indicator */}
-                    <Box className="flex items-center space-x-2">
-                        <Box className="w-2 h-2 bg-green-500 rounded-full"></Box>
-                        <span className="text-sm text-gray-600 hidden sm:inline">Online</span>
-                    </Box>
                 </Toolbar>
             </AppBar>
 
