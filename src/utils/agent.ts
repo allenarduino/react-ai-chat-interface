@@ -178,10 +178,10 @@ const generateBulletReply = (
 
     return `${tone.greeting} ${attachmentMention}Here are the key points about "${userText}":
 
-• **Primary consideration**: This is the most important aspect to understand
-• **Secondary factors**: These elements support the main concept
-• **Implementation details**: How to actually apply this knowledge
-${maxBullets > 3 ? '• **Advanced concepts**: Deeper insights for better understanding\n• **Common pitfalls**: Things to avoid when working with this\n• **Best practices**: Recommended approaches for success' : ''}
+- **Primary consideration**: This is the most important aspect to understand
+- **Secondary factors**: These elements support the main concept
+- **Implementation details**: How to actually apply this knowledge
+${maxBullets > 3 ? '- **Advanced concepts**: Deeper insights for better understanding\n- **Common pitfalls**: Things to avoid when working with this\n- **Best practices**: Recommended approaches for success' : ''}
 
 ${tone.closing}`;
 };
