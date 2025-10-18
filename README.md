@@ -4,6 +4,8 @@ A modern, fully-featured AI chat interface built with React, TypeScript, Materia
 
 ## Demo
 
+**[Live Demo](https://react-ai-chat-interface.vercel.app/)** - Try it now!
+
 ![React Chat Interface Demo](https://github.com/allenarduino/react-ai-chat-interface/blob/main/demo/demo.gif?raw=true)
 
 *Experience the chat interface with smooth animations, file attachments, and customizable AI response options*
