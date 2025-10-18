@@ -109,7 +109,7 @@ const Composer: React.FC<ComposerProps> = ({
             </div>
 
             {/* Message Input */}
-            <Box className="flex items-end space-x-2">
+            <Box className="flex items-center space-x-3">
                 {/* File attachment button */}
                 <Box className="flex-shrink-0">
                     <Attachments
@@ -156,6 +156,7 @@ const Composer: React.FC<ComposerProps> = ({
                         '& .MuiInputBase-input': {
                             color: '#333333',
                             resize: 'none',
+                            padding: '9px 9px',
                             '&::placeholder': {
                                 color: '#999999',
                                 opacity: 1,
@@ -175,8 +176,8 @@ const Composer: React.FC<ComposerProps> = ({
                     className="text-gray-500 hover:text-gray-700"
                     sx={{
                         borderRadius: '8px',
-                        width: '40px',
-                        height: '40px',
+                        width: '48px',
+                        height: '48px',
                         transition: 'all 0.2s ease-in-out',
                     }}
                     aria-label="Response settings"
