@@ -94,7 +94,7 @@ const Home: React.FC = () => {
     return (
         <Box className="flex flex-col h-full relative">
             {/* Chat Messages Area - Scrollable */}
-            <Box className="flex-1 overflow-y-auto pb-20">
+            <Box className={`flex-1 overflow-y-auto ${attachedFiles.length > 0 ? 'pb-48' : 'pb-28'}`}>
                 <MessageList messages={messages} />
 
                 {/* Typing Indicator */}
