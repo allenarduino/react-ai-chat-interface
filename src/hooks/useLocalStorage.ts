@@ -16,7 +16,18 @@ export function useLocalStorage<T>(
             // Get from local storage by key
             const item = window.localStorage.getItem(key);
             // Parse stored json or if none return initialValue
-            return item ? JSON.parse(item) : initialValue;
+            if (!item) return initialValue;
+
+            // Parse and revive Date objects
+            const parsed = JSON.parse(item, (key, value) => {
+                // Check if the value looks like a date string
+                if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/.test(value)) {
+                    return new Date(value);
+                }
+                return value;
+            });
+
+            return parsed;
         } catch (error) {
             // If error also return initialValue
             console.warn(`Error reading localStorage key "${key}":`, error);
@@ -28,14 +39,16 @@ export function useLocalStorage<T>(
     // ... persists the new value to localStorage.
     const setValue = (value: SetValue<T>) => {
         try {
-            // Allow value to be a function so we have the same API as useState
-            const valueToStore = value instanceof Function ? value(storedValue) : value;
-            // Save state
-            setStoredValue(valueToStore);
-            // Save to local storage
-            if (typeof window !== 'undefined') {
-                window.localStorage.setItem(key, JSON.stringify(valueToStore));
-            }
+            // Use functional update to ensure we have the latest state
+            setStoredValue((prevValue) => {
+                // Allow value to be a function so we have the same API as useState
+                const valueToStore = value instanceof Function ? value(prevValue) : value;
+                // Save to local storage
+                if (typeof window !== 'undefined') {
+                    window.localStorage.setItem(key, JSON.stringify(valueToStore));
+                }
+                return valueToStore;
+            });
         } catch (error) {
             // A more advanced implementation would handle the error case
             console.warn(`Error setting localStorage key "${key}":`, error);
@@ -59,7 +72,15 @@ export function useLocalStorage<T>(
         const handleStorageChange = (e: StorageEvent) => {
             if (e.key === key && e.newValue !== null) {
                 try {
-                    setStoredValue(JSON.parse(e.newValue));
+                    // Parse and revive Date objects
+                    const parsed = JSON.parse(e.newValue, (key, value) => {
+                        // Check if the value looks like a date string
+                        if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/.test(value)) {
+                            return new Date(value);
+                        }
+                        return value;
+                    });
+                    setStoredValue(parsed);
                 } catch (error) {
                     console.warn(`Error parsing localStorage key "${key}":`, error);
                 }
