@@ -1,15 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Box } from '@mui/material';
+import { Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography } from '@mui/material';
 import { AnimatePresence } from 'framer-motion';
 import type { Message, Attachment, ChatOptions } from '../types/chat';
 import { DEFAULT_CHAT_OPTIONS } from '../types/chat';
 import { generateMessageId } from '../utils/format';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 import MessageList from '../components/MessageList';
 import Composer from '../components/Composer';
 import TypingIndicator from '../components/TypingIndicator';
 
 const Home: React.FC = () => {
-    const [messages, setMessages] = useState<Message[]>([
+    // Default initial messages
+    const defaultMessages: Message[] = [
         {
             id: generateMessageId(),
             text: 'Hello! I\'m your AI assistant. How can I help you today?\n\nHere\'s what I can do:\n\n- **Explain** concepts\n- **Generate** content\n- Answer with `inline code` or links like [Tailwind](https://tailwindcss.com)\n\n1. Ask a question\n2. Share context\n3. Get an answer',
@@ -34,11 +36,15 @@ const Home: React.FC = () => {
             attachments: [],
             status: 'delivered'
         }
-    ]);
+    ];
 
-    const [attachedFiles, setAttachedFiles] = useState<Attachment[]>([]);
-    const [options, setOptions] = useState<ChatOptions>(DEFAULT_CHAT_OPTIONS);
+    // Use localStorage for persistence
+    const [messages, setMessages] = useLocalStorage<Message[]>('chat-messages', defaultMessages);
+    const [attachedFiles, setAttachedFiles] = useLocalStorage<Attachment[]>('chat-attachments', []);
+    const [options, setOptions] = useLocalStorage<ChatOptions>('chat-options', DEFAULT_CHAT_OPTIONS);
+
     const [isTyping, setIsTyping] = useState(false);
+    const [showClearDialog, setShowClearDialog] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     // Auto-scroll to bottom when new messages arrive
@@ -90,9 +96,37 @@ const Home: React.FC = () => {
         }, typingDelay);
     };
 
+    // Clear conversation function
+    const handleClearConversation = () => {
+        setMessages(defaultMessages);
+        setAttachedFiles([]);
+        setOptions(DEFAULT_CHAT_OPTIONS);
+        setShowClearDialog(false);
+    };
+
 
     return (
         <Box className="flex flex-col h-full relative">
+            {/* Clear Conversation Button */}
+            <Box className="absolute top-4 right-4 z-10">
+                <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() => setShowClearDialog(true)}
+                    sx={{
+                        backgroundColor: 'white',
+                        borderColor: '#E5E7EB',
+                        color: '#6B7280',
+                        '&:hover': {
+                            backgroundColor: '#F9FAFB',
+                            borderColor: '#D1D5DB',
+                        },
+                    }}
+                >
+                    Clear Conversation
+                </Button>
+            </Box>
+
             {/* Chat Messages Area - Scrollable */}
             <Box className={`flex-1 overflow-y-auto ${attachedFiles.length > 0 ? 'pb-48' : 'pb-28'}`}>
                 <MessageList messages={messages} />
@@ -120,6 +154,38 @@ const Home: React.FC = () => {
                     </Box>
                 </Box>
             </Box>
+
+            {/* Clear Conversation Confirmation Dialog */}
+            <Dialog
+                open={showClearDialog}
+                onClose={() => setShowClearDialog(false)}
+                aria-labelledby="clear-dialog-title"
+                aria-describedby="clear-dialog-description"
+            >
+                <DialogTitle id="clear-dialog-title">
+                    Clear Conversation
+                </DialogTitle>
+                <DialogContent>
+                    <Typography id="clear-dialog-description">
+                        Are you sure you want to clear the entire conversation? This action cannot be undone and will reset all messages, attachments, and settings to their default state.
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        onClick={() => setShowClearDialog(false)}
+                        color="inherit"
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleClearConversation}
+                        color="error"
+                        variant="contained"
+                    >
+                        Clear All
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 };
