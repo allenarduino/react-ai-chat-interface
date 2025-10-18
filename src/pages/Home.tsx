@@ -92,9 +92,9 @@ const Home: React.FC = () => {
 
 
     return (
-        <Box className="flex flex-col h-full">
-            {/* Chat Messages Area */}
-            <Box className="flex-1 overflow-y-auto">
+        <Box className="flex flex-col h-full relative">
+            {/* Chat Messages Area - Scrollable */}
+            <Box className="flex-1 overflow-y-auto pb-20">
                 <MessageList messages={messages} />
 
                 {/* Typing Indicator */}
@@ -106,14 +106,20 @@ const Home: React.FC = () => {
                 <div ref={messagesEndRef} />
             </Box>
 
-            {/* Composer Section */}
-            <Composer
-                onSend={handleSendMessage}
-                options={options}
-                onOptionsChange={setOptions}
-                attachments={attachedFiles}
-                onAttachmentsChange={setAttachedFiles}
-            />
+            {/* Fixed Composer Section at Bottom */}
+            <Box className="fixed bottom-0 left-0 right-0 z-50">
+                <Box className="max-w-6xl mx-auto px-4 pb-4">
+                    <Box className="bg-white border-t border-gray-200 rounded-t-lg shadow-lg">
+                        <Composer
+                            onSend={handleSendMessage}
+                            options={options}
+                            onOptionsChange={setOptions}
+                            attachments={attachedFiles}
+                            onAttachmentsChange={setAttachedFiles}
+                        />
+                    </Box>
+                </Box>
+            </Box>
         </Box>
     );
 };
