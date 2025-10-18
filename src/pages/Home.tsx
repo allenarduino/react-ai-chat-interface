@@ -5,6 +5,7 @@ import type { Message, Attachment, ChatOptions } from '../types/chat';
 import { DEFAULT_CHAT_OPTIONS } from '../types/chat';
 import { generateMessageId } from '../utils/format';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { generateAgentReply } from '../utils/agent';
 import MessageList from '../components/MessageList';
 import Composer from '../components/Composer';
 import TypingIndicator from '../components/TypingIndicator';
@@ -75,7 +76,7 @@ const Home: React.FC<HomeProps> = ({ onRegisterClearHandler }) => {
     ], []);
 
     // Use localStorage for persistence
-    const STORAGE_VERSION = '3.0.0'; // Increment this to force reset
+    const STORAGE_VERSION = '4.0.0'; // Increment this to force reset
     const [messages, setMessages] = useLocalStorage<Message[]>('chat-messages', defaultMessages);
     const [attachedFiles, setAttachedFiles] = useLocalStorage<Attachment[]>('chat-attachments', []);
     const [options, setOptions] = useLocalStorage<ChatOptions>('chat-options', DEFAULT_CHAT_OPTIONS);
@@ -129,16 +130,9 @@ const Home: React.FC<HomeProps> = ({ onRegisterClearHandler }) => {
             // Hide typing indicator
             setIsTyping(false);
 
-            // Generate AI response
-            const agentMessage: Message = {
-                id: generateMessageId(),
-                text: `Thanks for your message! I'm processing your request with ${options.tone} tone and ${options.responseLength} length using ${options.model}...`,
-                sender: 'agent',
-                timestamp: new Date(),
-                attachments: [],
-                status: 'delivered',
-                options: options
-            };
+            // Generate realistic AI response based on options
+            const agentMessage = generateAgentReply(text, options, attachments);
+            agentMessage.options = options; // Add options to the message
 
             setMessages(prev => [...prev, agentMessage]);
         }, typingDelay);
