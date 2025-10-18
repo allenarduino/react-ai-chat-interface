@@ -2,6 +2,12 @@
 
 A modern, fully-featured AI chat interface built with React, TypeScript, Material-UI, and Tailwind CSS. Features include file attachments, typing indicators, persistent conversations, and customizable response options.
 
+## Demo
+
+![React Chat Interface Demo](https://github.com/allenarduino/react-ai-chat-interface/blob/main/demo/demo.gif?raw=true)
+
+*Experience the chat interface with smooth animations, file attachments, and customizable AI response options*
+
 ## Setup and Run Instructions
 
 ```bash
