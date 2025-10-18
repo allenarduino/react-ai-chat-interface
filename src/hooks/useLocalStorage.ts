@@ -19,7 +19,7 @@ export function useLocalStorage<T>(
             if (!item) return initialValue;
 
             // Parse and revive Date objects
-            const parsed = JSON.parse(item, (key, value) => {
+            const parsed = JSON.parse(item, (_key, value) => {
                 // Check if the value looks like a date string
                 if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/.test(value)) {
                     return new Date(value);
@@ -73,7 +73,7 @@ export function useLocalStorage<T>(
             if (e.key === key && e.newValue !== null) {
                 try {
                     // Parse and revive Date objects
-                    const parsed = JSON.parse(e.newValue, (key, value) => {
+                    const parsed = JSON.parse(e.newValue, (_key, value) => {
                         // Check if the value looks like a date string
                         if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/.test(value)) {
                             return new Date(value);
@@ -98,31 +98,33 @@ export function useLocalStorage<T>(
 export const STORAGE_SCHEMA_VERSION = '1.0.0';
 
 // Helper function to check and migrate data if needed
-export function migrateStorageData<T>(data: any, expectedVersion: string): T | null {
+export function migrateStorageData<T>(data: unknown, expectedVersion: string): T | null {
     try {
-        // If no version, assume it's the current version
-        if (!data || typeof data !== 'object' || !data._schemaVersion) {
-            return data;
+        // Type guard to check if data has _schemaVersion property
+        if (!data || typeof data !== 'object' || !('_schemaVersion' in data)) {
+            return data as T;
         }
 
+        const versionedData = data as Record<string, unknown>;
+
         // If versions match, return the data
-        if (data._schemaVersion === expectedVersion) {
-            return data;
+        if (versionedData._schemaVersion === expectedVersion) {
+            return data as T;
         }
 
         // Handle different schema versions
-        switch (data._schemaVersion) {
+        switch (versionedData._schemaVersion) {
             case '0.9.0':
                 // Example migration from 0.9.0 to 1.0.0
                 // Add any necessary transformations here
                 console.log('Migrating data from schema version 0.9.0 to 1.0.0');
                 return {
-                    ...data,
+                    ...versionedData,
                     _schemaVersion: expectedVersion,
                     // Add any new required fields with defaults
-                };
+                } as T;
             default:
-                console.warn(`Unknown schema version: ${data._schemaVersion}`);
+                console.warn(`Unknown schema version: ${versionedData._schemaVersion}`);
                 return null;
         }
     } catch (error) {

@@ -15,7 +15,7 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
-    "prepare": "simple-git-hooks"
+    "prepare": "node -e \"try { require('simple-git-hooks').install() } catch (e) { console.log('Skipping git hooks installation') }\""
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
