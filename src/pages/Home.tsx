@@ -108,7 +108,7 @@ const Home: React.FC = () => {
 
             {/* Fixed Composer Section at Bottom */}
             <Box className="fixed bottom-0 left-0 right-0 z-50">
-                <Box className="max-w-6xl mx-auto px-4">
+                <Box className="max-w-6xl mx-auto px-2 sm:px-4">
                     <Box className="bg-white border-t border-gray-200 rounded-t-lg shadow-lg">
                         <Composer
                             onSend={handleSendMessage}
