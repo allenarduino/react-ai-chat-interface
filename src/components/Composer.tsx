@@ -50,7 +50,7 @@ const Composer: React.FC<ComposerProps> = ({
 
     const handleSend = () => {
         const trimmedMessage = message.trim();
-        if (trimmedMessage && !disabled) {
+        if ((trimmedMessage || attachments.length > 0) && !disabled) {
             onSend(trimmedMessage, options, attachments);
             setMessage('');
             onAttachmentsChange([]);
@@ -58,7 +58,7 @@ const Composer: React.FC<ComposerProps> = ({
     };
 
 
-    const canSend = message.trim().length > 0 && !disabled;
+    const canSend = (message.trim().length > 0 || attachments.length > 0) && !disabled;
 
 
     // Handle clicking outside the options panel

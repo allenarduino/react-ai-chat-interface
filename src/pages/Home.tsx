@@ -109,7 +109,7 @@ const Home: React.FC<HomeProps> = ({ onRegisterClearHandler }) => {
         // Add user message immediately
         const userMessage: Message = {
             id: generateMessageId(),
-            text,
+            text: text || (attachments.length > 0 ? `Sent ${attachments.length} file${attachments.length > 1 ? 's' : ''}` : ''),
             sender: 'user',
             timestamp: new Date(),
             attachments,
