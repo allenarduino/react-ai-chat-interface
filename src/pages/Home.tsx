@@ -106,10 +106,34 @@ const Home: React.FC<HomeProps> = ({ onRegisterClearHandler }) => {
     }, [messages, isTyping]);
 
     const handleSendMessage = (text: string, options: ChatOptions, attachments: Attachment[]) => {
+        // Function to truncate file names
+        const truncateFileName = (fileName: string, maxLength: number = 15) => {
+            if (fileName.length <= maxLength) {
+                return fileName;
+            }
+            const extension = fileName.split('.').pop();
+            const nameWithoutExt = fileName.substring(0, fileName.lastIndexOf('.'));
+            const truncatedName = nameWithoutExt.substring(0, maxLength - extension!.length - 4); // -4 for "..."
+            return `${truncatedName}...${extension}`;
+        };
+
+        // Generate file-only message text
+        const generateFileMessage = (attachments: Attachment[]) => {
+            if (attachments.length === 1) {
+                return `Sent file: ${truncateFileName(attachments[0].name)}`;
+            } else if (attachments.length <= 3) {
+                const fileNames = attachments.map(att => truncateFileName(att.name)).join(', ');
+                return `Sent ${attachments.length} files: ${fileNames}`;
+            } else {
+                const firstFiles = attachments.slice(0, 2).map(att => truncateFileName(att.name)).join(', ');
+                return `Sent ${attachments.length} files: ${firstFiles} and ${attachments.length - 2} more`;
+            }
+        };
+
         // Add user message immediately
         const userMessage: Message = {
             id: generateMessageId(),
-            text: text || (attachments.length > 0 ? `Sent ${attachments.length} file${attachments.length > 1 ? 's' : ''}` : ''),
+            text: text || (attachments.length > 0 ? generateFileMessage(attachments) : ''),
             sender: 'user',
             timestamp: new Date(),
             attachments,
