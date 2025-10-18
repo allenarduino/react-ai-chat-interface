@@ -5,10 +5,10 @@ import { motion } from 'framer-motion';
 const TypingIndicator: React.FC = () => {
     return (
         <motion.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 3 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3 }}
+            exit={{ opacity: 0, y: -3 }}
+            transition={{ duration: 0.08 }}
         >
             <Box
                 className="flex items-start space-x-3 p-4"
@@ -54,9 +54,9 @@ const TypingIndicator: React.FC = () => {
                                             opacity: [0.4, 1, 0.4],
                                         }}
                                         transition={{
-                                            duration: 1.2,
+                                            duration: 0.6,
                                             repeat: Infinity,
-                                            delay: index * 0.2,
+                                            delay: index * 0.05,
                                             ease: "easeInOut",
                                         }}
                                     />
