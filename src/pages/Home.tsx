@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography } from '@mui/material';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { Box, Dialog, DialogTitle, DialogContent, DialogActions, Typography, Button } from '@mui/material';
 import { AnimatePresence } from 'framer-motion';
 import type { Message, Attachment, ChatOptions } from '../types/chat';
 import { DEFAULT_CHAT_OPTIONS } from '../types/chat';
@@ -9,34 +9,38 @@ import MessageList from '../components/MessageList';
 import Composer from '../components/Composer';
 import TypingIndicator from '../components/TypingIndicator';
 
-const Home: React.FC = () => {
+interface HomeProps {
+    onRegisterClearHandler?: (handler: () => void) => void;
+}
+
+const Home: React.FC<HomeProps> = ({ onRegisterClearHandler }) => {
     // Default initial messages
-    const defaultMessages: Message[] = [
+    const defaultMessages = useMemo<Message[]>(() => [
         {
             id: generateMessageId(),
             text: 'Hello! I\'m your AI assistant. How can I help you today?\n\nHere\'s what I can do:\n\n- **Explain** concepts\n- **Generate** content\n- Answer with `inline code` or links like [Tailwind](https://tailwindcss.com)\n\n1. Ask a question\n2. Share context\n3. Get an answer',
-            sender: 'agent',
+            sender: 'agent' as const,
             timestamp: new Date(Date.now() - 300000),
             attachments: [],
-            status: 'delivered'
+            status: 'delivered' as const
         },
         {
             id: generateMessageId(),
             text: 'Hi! I need help with my React project.',
-            sender: 'user',
+            sender: 'user' as const,
             timestamp: new Date(Date.now() - 240000),
             attachments: [],
-            status: 'delivered'
+            status: 'delivered' as const
         },
         {
             id: generateMessageId(),
             text: 'I\'d be happy to help with your React project!\n\nTry this next:\n\n- Create a component named **MessageBubble**\n- Support `inline code` and lists\n\n```js\nconst x = 42;\nconsole.log(x);\n```',
-            sender: 'agent',
+            sender: 'agent' as const,
             timestamp: new Date(Date.now() - 180000),
             attachments: [],
-            status: 'delivered'
+            status: 'delivered' as const
         }
-    ];
+    ], []);
 
     // Use localStorage for persistence
     const [messages, setMessages] = useLocalStorage<Message[]>('chat-messages', defaultMessages);
@@ -97,36 +101,23 @@ const Home: React.FC = () => {
     };
 
     // Clear conversation function
-    const handleClearConversation = () => {
+    const handleClearConversation = useCallback(() => {
         setMessages(defaultMessages);
         setAttachedFiles([]);
         setOptions(DEFAULT_CHAT_OPTIONS);
         setShowClearDialog(false);
-    };
+    }, [defaultMessages, setMessages, setAttachedFiles, setOptions]);
+
+    // Register clear handler with parent
+    useEffect(() => {
+        if (onRegisterClearHandler) {
+            onRegisterClearHandler(() => setShowClearDialog(true));
+        }
+    }, [onRegisterClearHandler]);
 
 
     return (
         <Box className="flex flex-col h-full relative">
-            {/* Clear Conversation Button */}
-            <Box className="absolute top-4 right-4 z-10">
-                <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={() => setShowClearDialog(true)}
-                    sx={{
-                        backgroundColor: 'white',
-                        borderColor: '#E5E7EB',
-                        color: '#6B7280',
-                        '&:hover': {
-                            backgroundColor: '#F9FAFB',
-                            borderColor: '#D1D5DB',
-                        },
-                    }}
-                >
-                    Clear Conversation
-                </Button>
-            </Box>
-
             {/* Chat Messages Area - Scrollable */}
             <Box className={`flex-1 overflow-y-auto ${attachedFiles.length > 0 ? 'pb-48' : 'pb-28'}`}>
                 <MessageList messages={messages} />
@@ -167,7 +158,7 @@ const Home: React.FC = () => {
                 </DialogTitle>
                 <DialogContent>
                     <Typography id="clear-dialog-description">
-                        Are you sure you want to clear the entire conversation? This action cannot be undone and will reset all messages, attachments, and settings to their default state.
+                        Are you sure you want to clear the entire conversation? This action cannot be undone and will reset all messages.
                     </Typography>
                 </DialogContent>
                 <DialogActions>

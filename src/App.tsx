@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import AppShell from './components/AppShell';
@@ -11,12 +12,18 @@ const theme = createTheme({
 });
 
 function App() {
+  const [clearConversationHandler, setClearConversationHandler] = useState<(() => void) | undefined>();
+
+  const registerClearHandler = (handler: () => void) => {
+    setClearConversationHandler(() => handler);
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <Router>
-        <AppShell>
+        <AppShell onClearConversation={clearConversationHandler}>
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<Home onRegisterClearHandler={registerClearHandler} />} />
           </Routes>
         </AppShell>
       </Router>
