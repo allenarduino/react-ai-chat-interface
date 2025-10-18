@@ -56,7 +56,10 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
                         variant="caption"
                         className="text-xs text-gray-500 mt-1 mr-1"
                     >
-                        {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {message.timestamp instanceof Date
+                            ? message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                            : new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        }
                     </Typography>
                 </Box>
                 <img
@@ -104,7 +107,10 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
                     variant="caption"
                     className="text-xs text-gray-500 mt-1 ml-1"
                 >
-                    {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {message.timestamp instanceof Date
+                        ? message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        : new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    }
                 </Typography>
             </Box>
         </Box>

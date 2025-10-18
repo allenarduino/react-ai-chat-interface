@@ -26,13 +26,16 @@ const MessageList: React.FC<MessageListProps> = ({ messages }) => {
             {messages.map((m, index) => (
                 <motion.div
                     key={m.id}
-                    initial={m.sender === 'agent' ? { opacity: 0, y: 20, scale: 0.95 } : false}
-                    animate={m.sender === 'agent' ? { opacity: 1, y: 0, scale: 1 } : false}
+                    initial={m.sender === 'agent' ? { opacity: 0, y: 20, scale: 0.95 } : { opacity: 1, y: 0, scale: 1 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
                     transition={m.sender === 'agent' ? {
                         duration: 0.4,
                         delay: index * 0.1,
                         ease: "easeOut"
-                    } : {}}
+                    } : {
+                        duration: 0.2,
+                        ease: "easeOut"
+                    }}
                     className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                     <MessageBubble message={m} />

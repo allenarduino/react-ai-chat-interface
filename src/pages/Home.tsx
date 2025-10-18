@@ -1,44 +1,54 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Box } from '@mui/material';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { Box, Dialog, DialogTitle, DialogContent, DialogActions, Typography, Button } from '@mui/material';
 import { AnimatePresence } from 'framer-motion';
 import type { Message, Attachment, ChatOptions } from '../types/chat';
 import { DEFAULT_CHAT_OPTIONS } from '../types/chat';
 import { generateMessageId } from '../utils/format';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 import MessageList from '../components/MessageList';
 import Composer from '../components/Composer';
 import TypingIndicator from '../components/TypingIndicator';
 
-const Home: React.FC = () => {
-    const [messages, setMessages] = useState<Message[]>([
+interface HomeProps {
+    onRegisterClearHandler?: (handler: () => void) => void;
+}
+
+const Home: React.FC<HomeProps> = ({ onRegisterClearHandler }) => {
+    // Default initial messages
+    const defaultMessages = useMemo<Message[]>(() => [
         {
             id: generateMessageId(),
             text: 'Hello! I\'m your AI assistant. How can I help you today?\n\nHere\'s what I can do:\n\n- **Explain** concepts\n- **Generate** content\n- Answer with `inline code` or links like [Tailwind](https://tailwindcss.com)\n\n1. Ask a question\n2. Share context\n3. Get an answer',
-            sender: 'agent',
+            sender: 'agent' as const,
             timestamp: new Date(Date.now() - 300000),
             attachments: [],
-            status: 'delivered'
+            status: 'delivered' as const
         },
         {
             id: generateMessageId(),
             text: 'Hi! I need help with my React project.',
-            sender: 'user',
+            sender: 'user' as const,
             timestamp: new Date(Date.now() - 240000),
             attachments: [],
-            status: 'delivered'
+            status: 'delivered' as const
         },
         {
             id: generateMessageId(),
             text: 'I\'d be happy to help with your React project!\n\nTry this next:\n\n- Create a component named **MessageBubble**\n- Support `inline code` and lists\n\n```js\nconst x = 42;\nconsole.log(x);\n```',
-            sender: 'agent',
+            sender: 'agent' as const,
             timestamp: new Date(Date.now() - 180000),
             attachments: [],
-            status: 'delivered'
+            status: 'delivered' as const
         }
-    ]);
+    ], []);
 
-    const [attachedFiles, setAttachedFiles] = useState<Attachment[]>([]);
-    const [options, setOptions] = useState<ChatOptions>(DEFAULT_CHAT_OPTIONS);
+    // Use localStorage for persistence
+    const [messages, setMessages] = useLocalStorage<Message[]>('chat-messages', defaultMessages);
+    const [attachedFiles, setAttachedFiles] = useLocalStorage<Attachment[]>('chat-attachments', []);
+    const [options, setOptions] = useLocalStorage<ChatOptions>('chat-options', DEFAULT_CHAT_OPTIONS);
+
     const [isTyping, setIsTyping] = useState(false);
+    const [showClearDialog, setShowClearDialog] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     // Auto-scroll to bottom when new messages arrive
@@ -90,6 +100,21 @@ const Home: React.FC = () => {
         }, typingDelay);
     };
 
+    // Clear conversation function
+    const handleClearConversation = useCallback(() => {
+        setMessages(defaultMessages);
+        setAttachedFiles([]);
+        setOptions(DEFAULT_CHAT_OPTIONS);
+        setShowClearDialog(false);
+    }, [defaultMessages, setMessages, setAttachedFiles, setOptions]);
+
+    // Register clear handler with parent
+    useEffect(() => {
+        if (onRegisterClearHandler) {
+            onRegisterClearHandler(() => setShowClearDialog(true));
+        }
+    }, [onRegisterClearHandler]);
+
 
     return (
         <Box className="flex flex-col h-full relative">
@@ -120,6 +145,38 @@ const Home: React.FC = () => {
                     </Box>
                 </Box>
             </Box>
+
+            {/* Clear Conversation Confirmation Dialog */}
+            <Dialog
+                open={showClearDialog}
+                onClose={() => setShowClearDialog(false)}
+                aria-labelledby="clear-dialog-title"
+                aria-describedby="clear-dialog-description"
+            >
+                <DialogTitle id="clear-dialog-title">
+                    Clear Conversation
+                </DialogTitle>
+                <DialogContent>
+                    <Typography id="clear-dialog-description">
+                        Are you sure you want to clear the entire conversation? This action cannot be undone and will reset all messages.
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        onClick={() => setShowClearDialog(false)}
+                        color="inherit"
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleClearConversation}
+                        color="error"
+                        variant="contained"
+                    >
+                        Clear All
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 };

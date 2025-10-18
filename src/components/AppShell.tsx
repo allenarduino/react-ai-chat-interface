@@ -1,11 +1,12 @@
 import React, { type ReactNode } from 'react';
-import { AppBar, Toolbar, Typography, Box } from '@mui/material';
+import { AppBar, Toolbar, Typography, Box, Button } from '@mui/material';
 
 interface AppShellProps {
     children: ReactNode;
+    onClearConversation?: () => void;
 }
 
-const AppShell: React.FC<AppShellProps> = ({ children }) => {
+const AppShell: React.FC<AppShellProps> = ({ children, onClearConversation }) => {
     return (
         <Box className="h-screen flex flex-col bg-gray-50">
             {/* Fixed Header */}
@@ -29,13 +30,38 @@ const AppShell: React.FC<AppShellProps> = ({ children }) => {
                         AI Chat Interface
                     </Typography>
 
-                    {/* Mode indicator and keyboard shortcut hint */}
-                    <Box className="flex items-center space-x-2">
-                        <Box className="flex items-center space-x-1 text-sm text-gray-500">
+                    {/* Clear Conversation Button */}
+                    {onClearConversation && (
+                        <Button
+                            variant="outlined"
+                            size="small"
+                            onClick={onClearConversation}
+                            sx={{
+                                marginRight: 2,
+                                backgroundColor: 'transparent',
+                                borderColor: '#000000',
+                                borderWidth: '1px',
+                                color: '#000000',
+                                fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                                padding: { xs: '4px 8px', sm: '6px 16px' },
+                                fontWeight: 500,
+                                textTransform: 'none',
+                                '&:hover': {
+                                    backgroundColor: '#F3F4F6',
+                                    borderColor: '#000000',
+                                    borderWidth: '2px',
+                                },
+                            }}
+                        >
+                            <span className="hidden sm:inline">Clear Conversation</span>
+                            <span className="sm:hidden">Clear</span>
+                        </Button>
+                    )}
 
-                        </Box>
+                    {/* Mode indicator */}
+                    <Box className="flex items-center space-x-2">
                         <Box className="w-2 h-2 bg-green-500 rounded-full"></Box>
-                        <span className="text-sm text-gray-600">Online</span>
+                        <span className="text-sm text-gray-600 hidden sm:inline">Online</span>
                     </Box>
                 </Toolbar>
             </AppBar>
