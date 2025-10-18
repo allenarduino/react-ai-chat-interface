@@ -17,7 +17,13 @@ const AppShell: React.FC<AppShellProps> = ({ children, onClearConversation }) =>
                     backgroundColor: '#FFFFFF',
                     borderBottom: '1px solid #E5E5E5',
                     color: '#333333',
-                    zIndex: 1000
+                    zIndex: 1000,
+                    width: '100%',
+                    '@media (min-width: 1024px)': {
+                        width: '68%',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                    }
                 }}
             >
                 <Toolbar className="px-4 py-3">
