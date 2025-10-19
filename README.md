@@ -35,6 +35,7 @@ npm run preview
 - **File Attachments**: Upload up to 5 files (10MB each) - supports images, documents, videos, and more
 - **Response Options**: Customize AI responses with tone, length, and model selection
 - **Persistent State**: Conversations automatically save to localStorage and survive page reloads
+- **Notification Sound**: Subtle "bloop" sound plays when AI responds (classic chatbot UX)
 - **Responsive Design**: Optimized for both desktop and mobile devices
 - **Smooth Animations**: Polished UI with Framer Motion transitions
 - **Markdown Support**: Rich text formatting in AI responses with code blocks, lists, and links
@@ -73,6 +74,7 @@ Selects the AI model (simulated in this demo):
 - **React Router** - Client-side routing
 - **Framer Motion** - Animation library
 - **React Markdown** - Markdown rendering
+- **Web Audio API** - Browser-native sound generation
 - **Vitest** - Unit testing framework
 - **React Testing Library** - Component testing
 - **Husky** - Git hooks for code quality
@@ -95,7 +97,9 @@ src/
 ├── pages/              # Page components
 │   └── Home.tsx       # Main chat page
 ├── hooks/              # Custom React hooks
-│   └── useLocalStorage.ts # localStorage persistence
+│   ├── __tests__/      # Hook unit tests
+│   ├── useLocalStorage.ts # localStorage persistence
+│   └── useNotificationSound.ts # Audio notification hook
 ├── utils/              # Utility functions
 │   ├── agent.ts       # AI response generation
 │   └── format.ts      # Formatting utilities
@@ -176,6 +180,7 @@ npm run test:coverage
 - CustomDropdown component  
 - OptionsPanel component
 - useLocalStorage hook (16 comprehensive tests)
+- useNotificationSound hook (audio generation tests)
 
 ## Available Scripts
 
