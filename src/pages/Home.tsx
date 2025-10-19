@@ -5,6 +5,7 @@ import type { Message, Attachment, ChatOptions } from '../types/chat';
 import { DEFAULT_CHAT_OPTIONS } from '../types/chat';
 import { generateMessageId } from '../utils/format';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useNotificationSound } from '../hooks/useNotificationSound';
 import { generateAgentReply } from '../utils/agent';
 import MessageList from '../components/MessageList';
 import Composer from '../components/Composer';
@@ -15,6 +16,9 @@ interface HomeProps {
 }
 
 const Home: React.FC<HomeProps> = ({ onRegisterClearHandler }) => {
+    // Notification sound hook
+    const { playNotificationSound } = useNotificationSound();
+
     // Default initial messages
     const defaultMessages = useMemo<Message[]>(() => [
         {
@@ -159,6 +163,9 @@ const Home: React.FC<HomeProps> = ({ onRegisterClearHandler }) => {
             agentMessage.options = options; // Add options to the message
 
             setMessages(prev => [...prev, agentMessage]);
+
+            // Play notification sound when AI responds
+            playNotificationSound();
         }, typingDelay);
     };
 
