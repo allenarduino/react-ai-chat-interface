@@ -19,61 +19,13 @@ const Home: React.FC<HomeProps> = ({ onRegisterClearHandler }) => {
     // Notification sound hook
     const { playNotificationSound } = useNotificationSound();
 
-    // Default initial messages
+    // Default initial message
     const defaultMessages = useMemo<Message[]>(() => [
         {
             id: generateMessageId(),
-            text: 'Hello! I\'m your AI assistant. How can I help you today?\n\nHere\'s what I can do:\n\n- **Explain** concepts\n- **Generate** content\n- Answer with `inline code` or links like [Tailwind](https://tailwindcss.com)\n\n1. Ask a question\n2. Share context\n3. Get an answer',
+            text: 'Hello! 👋 I\'m your AI assistant. How can I help you today?\n\n**Here\'s what I support:**\n\n- **Bold text** and *italic text*\n- `Inline code` snippets\n- [Hyperlinks](https://react.dev) that you can click\n- Bulleted and numbered lists\n- Code blocks with syntax highlighting\n\n**Example Code Block:**\n\n```javascript\nfunction greet(name) {\n  return `Hello, ${name}!`;\n}\n\nconsole.log(greet("World"));\n```\n\n**Numbered Steps:**\n\n1. Ask me anything\n2. Customize response options (tone, length, model)\n3. Attach files if needed\n4. Get instant responses\n\nFeel free to explore the interface and start chatting! 💬',
             sender: 'agent' as const,
-            timestamp: new Date(Date.now() - 660000),
-            attachments: [],
-            status: 'delivered' as const
-        },
-        {
-            id: generateMessageId(),
-            text: 'Can you show me examples of Markdown formatting? I need to see how bold, italic, inline code, links, and lists work.',
-            sender: 'user' as const,
-            timestamp: new Date(Date.now() - 600000),
-            attachments: [],
-            status: 'delivered' as const
-        },
-        {
-            id: generateMessageId(),
-            text: 'Absolutely! Here\'s a demonstration:\n\n**Text Formatting:**\n\n- **Bold text** using double asterisks\n- *Italic text* using single asterisks\n- `Inline code` using backticks\n- [Links](https://react.dev) that underline on hover\n\n**Lists:**\n\n- First item\n- Second item\n- Third item\n\n**Numbered List:**\n\n1. Step one\n2. Step two\n3. Step three\n\n**Code Block:**\n\n```js\nfunction greetUser(name) {\n  return `Hello, ${name}!`;\n}\nconsole.log(greetUser("World"));\n```',
-            sender: 'agent' as const,
-            timestamp: new Date(Date.now() - 540000),
-            attachments: [],
-            status: 'delivered' as const
-        },
-        {
-            id: generateMessageId(),
-            text: 'That\'s perfect! Can you show me a more complex example with nested lists and mixed formatting?',
-            sender: 'user' as const,
-            timestamp: new Date(Date.now() - 480000),
-            attachments: [],
-            status: 'delivered' as const
-        },
-        {
-            id: generateMessageId(),
-            text: 'Sure! Here\'s a comprehensive example:\n\n**Development Workflow:**\n\n1. **Planning Phase**\n   - Define requirements using user stories\n   - Create wireframes and mockups\n   - Review design guidelines\n\n2. **Development Phase**\n   - Set up git repository\n   - Implement core features first\n   - Write unit tests\n\n3. **Testing & Deployment**\n   - Run automated tests\n   - Deploy to staging environment\n\n**Sample Configuration (JSON):**\n\n```json\n{\n  "name": "my-project",\n  "version": "1.0.0",\n  "scripts": {\n    "start": "node server.js",\n    "test": "jest"\n  }\n}\n```',
-            sender: 'agent' as const,
-            timestamp: new Date(Date.now() - 420000),
-            attachments: [],
-            status: 'delivered' as const
-        },
-        {
-            id: generateMessageId(),
-            text: 'Can you also show inline code mixed with regular text?',
-            sender: 'user' as const,
-            timestamp: new Date(Date.now() - 360000),
-            attachments: [],
-            status: 'delivered' as const
-        },
-        {
-            id: generateMessageId(),
-            text: 'Of course! Here are some examples:\n\nTo install the package, run `npm install react` in your terminal.\n\nThe `useState` hook allows you to add state to functional components.\n\nAccess environment variables with `process.env.NODE_ENV` in Node.js.\n\nCheck the [documentation](https://react.dev) for more details about the API endpoints.\n\n**Quick Tips:**\n\n- Use `console.log()` for debugging\n- Always validate user input before processing\n- Remember to handle `async/await` errors properly',
-            sender: 'agent' as const,
-            timestamp: new Date(Date.now() - 300000),
+            timestamp: new Date(),
             attachments: [],
             status: 'delivered' as const
         }
