@@ -18,12 +18,13 @@ interface HomeProps {
 const Home: React.FC<HomeProps> = ({ onRegisterClearHandler }) => {
     // Notification sound hook
     const { playNotificationSound } = useNotificationSound();
+    const hasPlayedInitialSound = useRef(false);
 
     // Default initial message
     const defaultMessages = useMemo<Message[]>(() => [
         {
             id: generateMessageId(),
-            text: 'Hello! 👋 I\'m your AI assistant. How can I help you today?\n\n**Here\'s what I support:**\n\n- **Bold text** and *italic text*\n- `Inline code` snippets\n- [Hyperlinks](https://react.dev) that you can click\n- Bulleted and numbered lists\n- Code blocks with syntax highlighting\n\n**Example Code Block:**\n\n```javascript\nfunction greet(name) {\n  return `Hello, ${name}!`;\n}\n\nconsole.log(greet("World"));\n```\n\n**Numbered Steps:**\n\n1. Ask me anything\n2. Customize response options (tone, length, model)\n3. Attach files if needed\n4. Get instant responses\n\nFeel free to explore the interface and start chatting! 💬',
+            text: 'Hello! 👋 I\'m your AI assistant. How can I help you today?\n\n**Here\'s what I support:**\n\n- **Bold text** and *italic text*\n- `Inline code` snippets\n- [Hyperlinks](https://react.dev) that you can click\n- Bulleted and numbered lists\n- Code blocks with syntax highlighting\n\n**Example Code Block:**\n\n```javascript\nfunction greet(name) {\n  return `Hello, ${name}!`;\n}\n\nconsole.log(greet("World"));\n```\n\n**Numbered Steps:**\n\n1. Ask me anything\n2. Customize response options (tone, length, model)\n3. Attach files if needed\n4. Get instant responses\n\nFeel free to explore the interface and start chatting!',
             sender: 'agent' as const,
             timestamp: new Date(),
             attachments: [],
@@ -47,6 +48,20 @@ const Home: React.FC<HomeProps> = ({ onRegisterClearHandler }) => {
             setStorageVersion(STORAGE_VERSION);
         }
     }, [storageVersion, setMessages, setAttachedFiles, setOptions, setStorageVersion, defaultMessages]);
+
+    // Play notification sound for the initial welcome message
+    useEffect(() => {
+        // Only play once, when there's exactly one message (the default welcome message)
+        if (!hasPlayedInitialSound.current && messages.length === 1 && messages[0].sender === 'agent') {
+            hasPlayedInitialSound.current = true;
+            // Delay slightly to ensure the component is mounted
+            const timer = setTimeout(() => {
+                playNotificationSound();
+            }, 500);
+
+            return () => clearTimeout(timer);
+        }
+    }, [messages, playNotificationSound]);
 
     const [isTyping, setIsTyping] = useState(false);
     const [showClearDialog, setShowClearDialog] = useState(false);
@@ -127,6 +142,8 @@ const Home: React.FC<HomeProps> = ({ onRegisterClearHandler }) => {
         setAttachedFiles([]);
         setOptions(DEFAULT_CHAT_OPTIONS);
         setShowClearDialog(false);
+        // Reset the flag so the welcome sound plays again
+        hasPlayedInitialSound.current = false;
     }, [defaultMessages, setMessages, setAttachedFiles, setOptions]);
 
     // Register clear handler with parent
