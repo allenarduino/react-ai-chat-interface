@@ -19,6 +19,7 @@ const Home: React.FC<HomeProps> = ({ onRegisterClearHandler }) => {
     // Notification sound hook
     const { playNotificationSound } = useNotificationSound();
     const hasPlayedInitialSound = useRef(false);
+    const hasUpdatedInitialTimestamp = useRef(false);
 
     // Default initial message
     const defaultMessages = useMemo<Message[]>(() => [
@@ -49,19 +50,28 @@ const Home: React.FC<HomeProps> = ({ onRegisterClearHandler }) => {
         }
     }, [storageVersion, setMessages, setAttachedFiles, setOptions, setStorageVersion, defaultMessages]);
 
-    // Play notification sound for the initial welcome message
+    // Update timestamp and play sound for the initial welcome message
     useEffect(() => {
-        // Only play once, when there's exactly one message (the default welcome message)
-        if (!hasPlayedInitialSound.current && messages.length === 1 && messages[0].sender === 'agent') {
-            hasPlayedInitialSound.current = true;
-            // Delay slightly to ensure the component is mounted
-            const timer = setTimeout(() => {
-                playNotificationSound();
-            }, 500);
+        // Only process when there's exactly one message (the default welcome message)
+        if (messages.length === 1 && messages[0].sender === 'agent' && !hasUpdatedInitialTimestamp.current) {
+            hasUpdatedInitialTimestamp.current = true;
 
-            return () => clearTimeout(timer);
+            // Update the timestamp to current time
+            const updatedMessage = { ...messages[0], timestamp: new Date() };
+            setMessages([updatedMessage]);
+
+            // Play sound once
+            if (!hasPlayedInitialSound.current) {
+                hasPlayedInitialSound.current = true;
+                // Delay slightly to ensure the component is mounted
+                const timer = setTimeout(() => {
+                    playNotificationSound();
+                }, 500);
+
+                return () => clearTimeout(timer);
+            }
         }
-    }, [messages, playNotificationSound]);
+    }, [messages, playNotificationSound, setMessages]);
 
     const [isTyping, setIsTyping] = useState(false);
     const [showClearDialog, setShowClearDialog] = useState(false);
@@ -142,8 +152,9 @@ const Home: React.FC<HomeProps> = ({ onRegisterClearHandler }) => {
         setAttachedFiles([]);
         setOptions(DEFAULT_CHAT_OPTIONS);
         setShowClearDialog(false);
-        // Reset the flag so the welcome sound plays again
+        // Reset the flags so the welcome sound and timestamp update happen again
         hasPlayedInitialSound.current = false;
+        hasUpdatedInitialTimestamp.current = false;
     }, [defaultMessages, setMessages, setAttachedFiles, setOptions]);
 
     // Register clear handler with parent
