@@ -31,7 +31,7 @@ const markdownComponents = {
     ul: (props: MDProps) => <ul className="list-disc pl-5 space-y-1" {...props} />,
     ol: (props: MDProps) => <ol className="list-decimal pl-5 space-y-1" {...props} />,
     li: (props: MDProps) => <li className="leading-relaxed" {...props} />,
-    p: (props: MDProps) => <p className="leading-relaxed" {...props} />,
+    p: (props: MDProps) => <p className="leading-relaxed break-words" {...props} />,
     pre: (props: MDProps) => (
         <pre className="bg-[#EEEEEE] text-black font-mono rounded-md p-3 overflow-auto" {...props} />
     ),
@@ -48,7 +48,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
                         className="bg-black text-white px-4 py-3 rounded-2xl rounded-tr-md max-w-md shadow-sm"
                         aria-label="user message"
                     >
-                        <Typography variant="body1" className="whitespace-pre-wrap">
+                        <Typography variant="body1" className="whitespace-pre-wrap break-words">
                             {message.text}
                         </Typography>
                     </Box>
@@ -94,7 +94,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
 
                 {/* Message bubble */}
                 <Box
-                    className="bg-gray-100 text-gray-800 px-4 py-3 rounded-2xl rounded-tl-md max-w-md shadow-sm"
+                    className="bg-gray-100 text-gray-800 px-4 py-3 rounded-2xl rounded-tl-md max-w-md shadow-sm break-words"
                     aria-label="agent message"
                 >
                     <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
