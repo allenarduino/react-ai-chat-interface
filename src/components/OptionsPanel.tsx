@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Box, IconButton, Typography, Slider } from '@mui/material';
 import { Close } from '@mui/icons-material';
 import { CustomDropdown, type Option } from './CustomDropdown';
@@ -11,48 +11,51 @@ interface OptionsPanelProps {
     isOpen: boolean;
 }
 
+// Memoize options outside component to prevent recreation
+const TONE_OPTIONS: Option[] = [
+    { id: '1', value: 'professional', name: 'Professional' },
+    { id: '2', value: 'friendly', name: 'Friendly' },
+    { id: '3', value: 'formal', name: 'Formal' },
+    { id: '4', value: 'creative', name: 'Creative' },
+];
+
+const MODEL_OPTIONS: Option[] = [
+    { id: '1', value: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo' },
+    { id: '2', value: 'gpt-4', name: 'GPT-4' },
+    { id: '3', value: 'claude-3.5-sonnet', name: 'Claude 3.5 Sonnet' },
+];
+
 const OptionsPanel: React.FC<OptionsPanelProps> = ({
     options,
     onOptionsChange,
     onClose,
     isOpen
 }) => {
-    if (!isOpen) return null;
-
-    const toneOptions: Option[] = [
-        { id: '1', value: 'professional', name: 'Professional' },
-        { id: '2', value: 'friendly', name: 'Friendly' },
-        { id: '3', value: 'formal', name: 'Formal' },
-        { id: '4', value: 'creative', name: 'Creative' },
-    ];
-
-    const modelOptions: Option[] = [
-        { id: '1', value: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo' },
-        { id: '2', value: 'gpt-4', name: 'GPT-4' },
-        { id: '3', value: 'claude-3.5-sonnet', name: 'Claude 3.5 Sonnet' },
-    ];
-
-    const handleToneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // Memoize handlers to prevent recreation on every render
+    // Must be called before any conditional returns (React Hooks rules)
+    const handleToneChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
         onOptionsChange({
             ...options,
             tone: event.target.value as 'professional' | 'friendly' | 'formal' | 'creative'
         });
-    };
+    }, [options, onOptionsChange]);
 
-    const handleLengthChange = (_: Event, newValue: number | number[]) => {
+    const handleLengthChange = useCallback((_: Event, newValue: number | number[]) => {
         const lengthValue = newValue === 1 ? 'short' : newValue === 2 ? 'medium' : 'long';
         onOptionsChange({
             ...options,
             responseLength: lengthValue as 'short' | 'medium' | 'long'
         });
-    };
+    }, [options, onOptionsChange]);
 
-    const handleModelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleModelChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
         onOptionsChange({
             ...options,
             model: event.target.value as 'gpt-3.5-turbo' | 'gpt-4' | 'claude-3.5-sonnet'
         });
-    };
+    }, [options, onOptionsChange]);
+
+    if (!isOpen) return null;
 
     return (
         <Box
@@ -92,7 +95,7 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({
                 <Box className="space-y-2">
                     <CustomDropdown
                         label="Tone"
-                        options={toneOptions}
+                        options={TONE_OPTIONS}
                         value={options.tone}
                         onChange={handleToneChange}
                     />
@@ -142,7 +145,7 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({
                 <Box className="space-y-2">
                     <CustomDropdown
                         label="Model Choice"
-                        options={modelOptions}
+                        options={MODEL_OPTIONS}
                         value={options.model}
                         onChange={handleModelChange}
                     />
@@ -152,4 +155,5 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({
     );
 };
 
-export default OptionsPanel;
+// Memoize component to prevent unnecessary re-renders
+export default React.memo(OptionsPanel);

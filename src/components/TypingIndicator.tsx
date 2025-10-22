@@ -70,4 +70,5 @@ const TypingIndicator: React.FC = () => {
     );
 };
 
-export default TypingIndicator;
+// Memoize component since it has no props and doesn't need to re-render
+export default React.memo(TypingIndicator);

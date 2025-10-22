@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Box, Typography } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -11,6 +11,7 @@ interface MessageBubbleProps {
 type MDProps = React.HTMLAttributes<HTMLElement>;
 type AnchorProps = React.AnchorHTMLAttributes<HTMLAnchorElement>;
 
+// Memoize markdown components to prevent recreation on every render
 const markdownComponents = {
     strong: (props: MDProps) => <strong className="font-semibold" {...props} />,
     em: (props: MDProps) => <em className="italic" {...props} />,
@@ -40,6 +41,19 @@ const markdownComponents = {
 const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
     const isUser = message.sender === 'user';
 
+    // Memoize timestamp formatting to avoid recalculation
+    const formattedTimestamp = useMemo(() => {
+        return message.timestamp instanceof Date
+            ? message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            : new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }, [message.timestamp]);
+
+    // Memoize options text for AI messages
+    const optionsText = useMemo(() => {
+        if (!message.options) return null;
+        return `${message.options.tone.charAt(0).toUpperCase() + message.options.tone.slice(1)} • ${message.options.responseLength.charAt(0).toUpperCase() + message.options.responseLength.slice(1)} • ${message.options.model.toUpperCase()}`;
+    }, [message.options]);
+
     if (isUser) {
         return (
             <Box className="flex items-start space-x-3 justify-end">
@@ -56,10 +70,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
                         variant="caption"
                         className="text-xs text-gray-500 mt-1 mr-1"
                     >
-                        {message.timestamp instanceof Date
-                            ? message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                            : new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                        }
+                        {formattedTimestamp}
                     </Typography>
                 </Box>
                 <img
@@ -83,12 +94,12 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
 
             <Box className="flex flex-col">
                 {/* Options indicator */}
-                {message.options && (
+                {optionsText && (
                     <Typography
                         variant="caption"
                         className="text-xs text-gray-500 mb-1 ml-1"
                     >
-                        {message.options.tone.charAt(0).toUpperCase() + message.options.tone.slice(1)} • {message.options.responseLength.charAt(0).toUpperCase() + message.options.responseLength.slice(1)} • {message.options.model.toUpperCase()}
+                        {optionsText}
                     </Typography>
                 )}
 
@@ -107,14 +118,12 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
                     variant="caption"
                     className="text-xs text-gray-500 mt-1 ml-1"
                 >
-                    {message.timestamp instanceof Date
-                        ? message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                        : new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                    }
+                    {formattedTimestamp}
                 </Typography>
             </Box>
         </Box>
     );
 };
 
-export default MessageBubble;
+// Memoize the entire component to prevent unnecessary re-renders
+export default React.memo(MessageBubble);

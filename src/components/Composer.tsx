@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { Box, TextField, IconButton } from '@mui/material';
 import { Send, Tune } from '@mui/icons-material';
 import { motion } from 'framer-motion';
@@ -40,25 +40,27 @@ const Composer: React.FC<ComposerProps> = ({
     }, [message]);
 
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            handleSend();
-        }
-        // Shift+Enter is handled by default textarea behavior (newline)
-    };
+    // Memoize canSend to avoid recalculation on every render
+    const canSend = useMemo(() => {
+        return (message.trim().length > 0 || attachments.length > 0) && !disabled;
+    }, [message, attachments.length, disabled]);
 
-    const handleSend = () => {
+    const handleSend = useCallback(() => {
         const trimmedMessage = message.trim();
         if ((trimmedMessage || attachments.length > 0) && !disabled) {
             onSend(trimmedMessage, options, attachments);
             setMessage('');
             onAttachmentsChange([]);
         }
-    };
+    }, [message, attachments, disabled, onSend, options, onAttachmentsChange]);
 
-
-    const canSend = (message.trim().length > 0 || attachments.length > 0) && !disabled;
+    const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSend();
+        }
+        // Shift+Enter is handled by default textarea behavior (newline)
+    }, [handleSend]);
 
 
     // Handle clicking outside the options panel
