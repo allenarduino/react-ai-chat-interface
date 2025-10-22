@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Box, Dialog, DialogTitle, DialogContent, DialogActions, Typography, Button } from '@mui/material';
 import { AnimatePresence } from 'framer-motion';
 import type { Message, Attachment, ChatOptions } from '../types/chat';
@@ -15,7 +15,7 @@ interface HomeProps {
     onRegisterClearHandler?: (handler: () => void) => void;
 }
 
-const Home: React.FC<HomeProps> = ({ onRegisterClearHandler }) => {
+function Home({ onRegisterClearHandler }: HomeProps) {
     // Notification sound hook
     const { playNotificationSound } = useNotificationSound();
     const hasPlayedInitialSound = useRef(false);
@@ -228,6 +228,6 @@ const Home: React.FC<HomeProps> = ({ onRegisterClearHandler }) => {
             </Dialog>
         </Box>
     );
-};
+}
 
 export default Home;

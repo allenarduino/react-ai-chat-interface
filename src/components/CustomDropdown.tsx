@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, MenuItem, TextField, Typography } from '@mui/material';
 import type { TextFieldProps } from '@mui/material';
 import type { ChangeEvent } from 'react';
@@ -20,7 +19,7 @@ export interface CustomDropdownProps extends Omit<TextFieldProps, 'helperText' |
     className?: string;
 }
 
-export const CustomDropdown: React.FC<CustomDropdownProps> = ({
+export function CustomDropdown({
     label,
     options,
     value,
@@ -30,7 +29,7 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
     disabled = false,
     className = "",
     ...props
-}) => {
+}: CustomDropdownProps) {
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
             <Typography
@@ -152,4 +151,4 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
             </TextField>
         </Box>
     );
-};
+}

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Box } from '@mui/material';
 import { motion } from 'framer-motion';
 import type { Message } from '../types/chat';
@@ -8,7 +8,7 @@ interface MessageListProps {
     messages: Message[];
 }
 
-const MessageList: React.FC<MessageListProps> = ({ messages }) => {
+function MessageList({ messages }: MessageListProps) {
     const endRef = useRef<HTMLDivElement>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [isScrolling, setIsScrolling] = useState(false);
@@ -76,6 +76,6 @@ const MessageList: React.FC<MessageListProps> = ({ messages }) => {
             <div ref={endRef} />
         </Box>
     );
-};
+}
 
 export default MessageList;

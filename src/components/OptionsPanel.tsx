@@ -25,12 +25,12 @@ const MODEL_OPTIONS: Option[] = [
     { id: '3', value: 'claude-3.5-sonnet', name: 'Claude 3.5 Sonnet' },
 ];
 
-const OptionsPanel: React.FC<OptionsPanelProps> = ({
+function OptionsPanel({
     options,
     onOptionsChange,
     onClose,
     isOpen
-}) => {
+}: OptionsPanelProps) {
     // Memoize handlers to prevent recreation on every render
     // Must be called before any conditional returns (React Hooks rules)
     const handleToneChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -153,7 +153,7 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({
             </Box>
         </Box>
     );
-};
+}
 
 // Memoize component to prevent unnecessary re-renders
 export default React.memo(OptionsPanel);

@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
 
-const TypingIndicator: React.FC = () => {
+function TypingIndicator() {
     return (
         <motion.div
             initial={{ opacity: 0, y: 3 }}
@@ -68,7 +68,7 @@ const TypingIndicator: React.FC = () => {
             </Box>
         </motion.div>
     );
-};
+}
 
 // Memoize component since it has no props and doesn't need to re-render
 export default React.memo(TypingIndicator);

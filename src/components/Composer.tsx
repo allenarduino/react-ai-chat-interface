@@ -16,7 +16,7 @@ interface ComposerProps {
     placeholder?: string;
 }
 
-const Composer: React.FC<ComposerProps> = ({
+function Composer({
     onSend,
     options,
     onOptionsChange,
@@ -24,7 +24,7 @@ const Composer: React.FC<ComposerProps> = ({
     onAttachmentsChange,
     disabled = false,
     placeholder = "Type a message..."
-}) => {
+}: ComposerProps) {
     const [message, setMessage] = useState('');
     const [isFocused, setIsFocused] = useState(false);
     const [showOptionsPanel, setShowOptionsPanel] = useState(false);
@@ -230,6 +230,6 @@ const Composer: React.FC<ComposerProps> = ({
             </Box>
         </Box>
     );
-};
+}
 
 export default Composer;

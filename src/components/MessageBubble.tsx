@@ -11,7 +11,7 @@ interface MessageBubbleProps {
 type MDProps = React.HTMLAttributes<HTMLElement>;
 type AnchorProps = React.AnchorHTMLAttributes<HTMLAnchorElement>;
 
-// Memoize markdown components to prevent recreation on every render
+// Memoize markdown components outside component to prevent recreation on every render
 const markdownComponents = {
     strong: (props: MDProps) => <strong className="font-semibold" {...props} />,
     em: (props: MDProps) => <em className="italic" {...props} />,
@@ -38,7 +38,7 @@ const markdownComponents = {
     ),
 };
 
-const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
+function MessageBubble({ message }: MessageBubbleProps) {
     const isUser = message.sender === 'user';
 
     // Memoize timestamp formatting to avoid recalculation
@@ -123,7 +123,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
             </Box>
         </Box>
     );
-};
+}
 
 // Memoize the entire component to prevent unnecessary re-renders
 export default React.memo(MessageBubble);

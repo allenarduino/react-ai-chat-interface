@@ -1,4 +1,4 @@
-import React, { type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import { AppBar, Toolbar, Typography, Box, Button } from '@mui/material';
 
 interface AppShellProps {
@@ -6,7 +6,7 @@ interface AppShellProps {
     onClearConversation?: () => void;
 }
 
-const AppShell: React.FC<AppShellProps> = ({ children, onClearConversation }) => {
+function AppShell({ children, onClearConversation }: AppShellProps) {
     return (
         <Box className="h-screen flex flex-col bg-gray-50">
             {/* Fixed Header */}
@@ -105,6 +105,6 @@ const AppShell: React.FC<AppShellProps> = ({ children, onClearConversation }) =>
             </Box>
         </Box>
     );
-};
+}
 
 export default AppShell;

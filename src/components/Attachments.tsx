@@ -29,7 +29,7 @@ interface AttachmentsProps {
     showOnlyButton?: boolean;
 }
 
-const Attachments: React.FC<AttachmentsProps> = ({
+function Attachments({
     attachments,
     onAttachmentsChange,
     maxFiles = 5,
@@ -37,7 +37,7 @@ const Attachments: React.FC<AttachmentsProps> = ({
     disabled = false,
     showOnlyChips = false,
     showOnlyButton = false
-}) => {
+}: AttachmentsProps) {
     const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const buttonFileInputRef = useRef<HTMLInputElement>(null);
@@ -461,6 +461,6 @@ const Attachments: React.FC<AttachmentsProps> = ({
             )}
         </Box>
     );
-};
+}
 
 export default Attachments;
